@@ -7,7 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="15.0.1" />
+      <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Store.Infrastructure\Store.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
