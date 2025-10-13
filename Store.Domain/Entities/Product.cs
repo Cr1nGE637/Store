@@ -1,3 +1,5 @@
+using CSharpFunctionalExtensions;
+
 namespace Store.Domain.Entities;
 
 public class Product
@@ -15,13 +17,13 @@ public class Product
         Price = price;
     }
 
-    public static Product Create(Guid id, string name, string description, decimal price)
+    public static Result<Product> Create(Guid id, string name, string description, decimal price)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentNullException(nameof(name));
+            return Result.Failure<Product>("Product name is required");
         }
         var product = new Product(id, name, description, price);
-        return product;
+        return Result.Success(product);
     }
 }
