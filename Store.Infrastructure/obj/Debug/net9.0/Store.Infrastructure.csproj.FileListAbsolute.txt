@@ -1,0 +1,6 @@
+D:\Lab\Store\Store.Infrastructure\obj\Debug\net9.0\Store.Infrastructure.csproj.AssemblyReference.cache
+D:\Lab\Store\Store.Infrastructure\obj\Debug\net9.0\Store.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\Lab\Store\Store.Infrastructure\obj\Debug\net9.0\Store.Infrastructure.AssemblyInfoInputs.cache
+D:\Lab\Store\Store.Infrastructure\obj\Debug\net9.0\Store.Infrastructure.AssemblyInfo.cs
+D:\Lab\Store\Store.Infrastructure\obj\Debug\net9.0\Store.Infrastructure.csproj.CoreCompileInputs.cache
+D:\Lab\Store\Store.Infrastructure\obj\Debug\net9.0\Store.Infrastructure.sourcelink.json
