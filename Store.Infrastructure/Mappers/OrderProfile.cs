@@ -4,11 +4,19 @@ using Store.Infrastructure.Entities;
 
 namespace Store.Infrastructure.Mappers;
 
-public class OrderProfile : Profile
+public class OrderProfile :  Profile
 {
     public OrderProfile()
     {
+        CreateMap<Order, OrderEntity>();
         CreateMap<OrderEntity, Order>()
-            .ForMember(src => src.OrderId, dest => dest.MapFrom(src => src.Id));
+            .ConstructUsing(src => Order.Create().Value)
+            .AfterMap((src, dest) =>
+            {
+                foreach (var product in dest.Products)
+                {
+                    dest.AddProduct(product);
+                }
+            });
     }
 }

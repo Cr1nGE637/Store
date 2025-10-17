@@ -10,5 +10,6 @@ public class OrderEntity
     public Guid CustomerId { get; set; }
     public decimal TotalPrice { get; set; }
     public OrderStatus Status { get; set; }
-    public CustomerEntity Customer { get; set; }
+    public CustomerEntity? Customer { get; set; }
+    public List<OrderedProductEntity>? OrderedProducts { get; set; }
 }
