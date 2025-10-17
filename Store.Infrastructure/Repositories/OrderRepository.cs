@@ -20,19 +20,21 @@ public class OrderRepository : IOrderRepository
         _mapper = mapper;
     }
 
-    public async Task<Order> GetByIdAsync(Guid orderId)
+    public async Task<Result<Order>> GetByIdAsync(Guid orderId)
     {
         var order = await _dbContext.Orders
             .Include(o => o.OrderedProducts)
             .FirstOrDefaultAsync(o => o.Id == orderId);
-        return _mapper.Map<Order>(order);
+        
+        return Result.Success(_mapper.Map<Order>(order));
     }
     
-    public async Task AddAsync(Order order)
+    public async Task<Result<Order>> CreateAsync(Order order)
     {
         var orderEntity = _mapper.Map<OrderEntity>(order);
         _dbContext.Add(orderEntity);
         await _dbContext.SaveChangesAsync();
+        return Result.Success(_mapper.Map<Order>(orderEntity));
     }
 
     public async Task<Result<Order>> UpdateAsync(Order order)
