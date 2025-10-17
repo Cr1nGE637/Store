@@ -7,9 +7,9 @@ public class OrderedProduct : ValueObject
 {
     public Guid ProductId { get; private set; }
     public int Quantity { get; private set; }
-    public string ProductName { get; private set; }
+    public string? ProductName { get; private set; }
     public decimal Price { get; private set; }
-    private OrderedProduct(Guid productId, string productProductName, decimal price, int quantity)
+    private OrderedProduct(Guid productId, string? productProductName, decimal price, int quantity)
     {
         ProductId = productId;
         Quantity = quantity;
@@ -17,7 +17,7 @@ public class OrderedProduct : ValueObject
         Price = price;
     }
 
-    public static Result<OrderedProduct> Create(Guid productId, int quantity, string productName, decimal price)
+    public static Result<OrderedProduct> Create(Guid productId, int quantity, string? productName, decimal price)
     {
         if (productId == Guid.Empty)
             return Result.Failure<OrderedProduct>("Invalid product ID");

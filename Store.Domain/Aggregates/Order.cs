@@ -8,6 +8,7 @@ namespace Store.Domain.Aggregates;
 public class Order
 {
     public Guid OrderId { get; private set; }
+    public Guid CustomerId { get; private set; }
     public DateTime OrderDate { get; private set; }
     public decimal TotalPrice { get; private set; }
     public OrderStatus Status { get; private set; }
@@ -15,15 +16,16 @@ public class Order
     private readonly List<OrderedProduct> _products = [];
     public IReadOnlyList<OrderedProduct> Products => _products.AsReadOnly();
 
-    private Order(Guid orderId, DateTime orderDate)
+    private Order(Guid orderId, Guid customerId, DateTime orderDate)
     {
         OrderId = orderId;
+        CustomerId = customerId;
         OrderDate = orderDate;
     }
 
-    public static Result<Order> Create()
+    public static Result<Order> Create(Guid customerId)
     {
-        var order = new Order(Guid.NewGuid(), DateTime.Now);
+        var order = new Order(Guid.NewGuid(), customerId, DateTime.Now);
         return Result.Success(order);
     }
     public void AddProduct(OrderedProduct product)
@@ -34,9 +36,12 @@ public class Order
     {
         _products.Remove(product);
     }
-
     public void RemoveAllProducts()
     {
         _products.Clear();
+    }
+    public void CalculateTotalPrice()
+    {
+        TotalPrice = _products.Sum(p => p.Price);
     }
 }
