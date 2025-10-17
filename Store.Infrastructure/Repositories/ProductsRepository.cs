@@ -36,13 +36,17 @@ public class ProductsRepository : IProductsRepository
         var productEntity = _mapper.Map<ProductEntity>(product);
         await _storeDbContext.Products.AddAsync(productEntity);
     }
-    public async Task<Product> DeleteProduct(Guid id)
+    public async Task<Result> DeleteProduct(Guid id)
     {
         var product = await _storeDbContext.Products
             .AsNoTracking()
-            .FirstAsync(p => p.Id == id);
+            .FirstOrDefaultAsync(p => p.Id == id);
+        if (product == null)
+        {
+            return Result.Failure("Product not found");
+        }
         _storeDbContext.Products.Remove(product);
-        return _mapper.Map<Product>(product);
+        return Result.Success(_mapper.Map<Product>(product));
     }
 
     public async Task<Result<Product>> UpdateProduct(Product product)

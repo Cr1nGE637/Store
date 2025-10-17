@@ -7,6 +7,7 @@ public class StoreDbContext(DbContextOptions<StoreDbContext> options) :  DbConte
 {
     public DbSet<ProductEntity> Products { get; set; }
     public DbSet<OrderEntity> Orders { get; set; }
+    public DbSet<OrderedProductEntity> OrderedProducts { get; set; }
     public DbSet<CustomerEntity> Customers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

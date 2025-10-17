@@ -4,16 +4,13 @@ using Store.Infrastructure.Entities;
 
 namespace Store.Infrastructure.Configuration;
 
-public class OrdersCofiguration :  IEntityTypeConfiguration<OrderEntity>
+public class OrdersConfiguration :  IEntityTypeConfiguration<OrderEntity>
 {
     public void Configure(EntityTypeBuilder<OrderEntity> builder)
     {
         builder.HasKey(o => o.Id);
         
         builder.Property(o => o.Id)
-            .ValueGeneratedOnAdd();
-        
-        builder.Property(o => o.OrderDate)
             .ValueGeneratedOnAdd();
         
         builder.Property(o => o.TotalPrice)

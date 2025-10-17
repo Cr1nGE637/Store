@@ -26,24 +26,17 @@ public class Order
         var order = new Order(Guid.NewGuid(), DateTime.Now);
         return Result.Success(order);
     }
-    public void AddProduct(Product product)
+    public void AddProduct(OrderedProduct product)
     {
          _products.Add(product);
     }
-    public void RemoveProduct(Product product)
+    public void RemoveProduct(OrderedProduct product)
     {
         _products.Remove(product);
     }
+
     public void RemoveAllProducts()
     {
         _products.Clear();
-    }
-
-    public void Pay()
-    {
-        if (Status == OrderStatus.Paid)
-        {
-            RemoveAllProducts();
-        }
     }
 }
