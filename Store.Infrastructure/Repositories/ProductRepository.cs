@@ -7,11 +7,11 @@ using Store.Infrastructure.DbContexts;
 using Store.Infrastructure.Entities;
 
 namespace Store.Infrastructure.Repositories;
-public class ProductsRepository : IProductsRepository
+public class ProductRepository : IProductRepository
 {
     private readonly StoreDbContext _storeDbContext;
     private readonly IMapper _mapper;
-    public ProductsRepository(StoreDbContext storeDbContext,  IMapper mapper)
+    public ProductRepository(StoreDbContext storeDbContext,  IMapper mapper)
     {
         _storeDbContext = storeDbContext;
         _mapper = mapper;
@@ -21,12 +21,12 @@ public class ProductsRepository : IProductsRepository
         var products = await _storeDbContext.Products.AsNoTracking().ToListAsync();
         return _mapper.Map<List<Product>>(products);
     }
-    public async Task<Product?> GetByNameProduct(string name)
+    public async Task<Product?> GetProductByName(string name)
     {
         var product = await _storeDbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Name == name);
         return product != null ? _mapper.Map<Product>(product) : null;
     }
-    public async Task<Product?> GetByIdProduct(Guid id)
+    public async Task<Product?> GetProductById(Guid id)
     {
         var product = await _storeDbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
         return product != null ? _mapper.Map<Product>(product) : null;
@@ -35,40 +35,31 @@ public class ProductsRepository : IProductsRepository
     {
         var productEntity = _mapper.Map<ProductEntity>(product);
         await _storeDbContext.Products.AddAsync(productEntity);
+        await _storeDbContext.SaveChangesAsync();
     }
     public async Task<Result> DeleteProduct(Guid id)
     {
         var product = await _storeDbContext.Products
-            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
         if (product == null)
         {
             return Result.Failure("Product not found");
         }
         _storeDbContext.Products.Remove(product);
-        return Result.Success(_mapper.Map<Product>(product));
+        return Result.Success();
     }
 
     public async Task<Result<Product>> UpdateProduct(Product product)
     {
-        var existingProduct = await _storeDbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == product.Id);
+        var existingProduct = await _storeDbContext.Products.FirstOrDefaultAsync(p => p.Id == product.Id);
 
         if (existingProduct == null)
         {
             return Result.Failure<Product>("Product not found");
         }
-
-        if (existingProduct.Name != product.Name)
-        {
-            var existingProductName = _storeDbContext.Products.Any(p => p.Name == product.Name);
-            if (existingProductName)
-            {
-                return Result.Failure<Product>("Product name already exists");
-            }
-        }
-        existingProduct.Name = product.Name;
-        existingProduct.Price = product.Price;
-        existingProduct.Description = product.Description;
+        
+        _mapper.Map(product, existingProduct);
+        await _storeDbContext.SaveChangesAsync();
         
         return Result.Success(_mapper.Map<Product>(existingProduct));
     }

@@ -1,4 +1,5 @@
 using AutoMapper;
+using CSharpFunctionalExtensions;
 using Store.Domain.ValueObjects;
 using Store.Infrastructure.Entities;
 
@@ -10,6 +11,21 @@ public class OrderedProductProfile :  Profile
     {
         CreateMap<OrderedProduct, OrderedProductEntity>();
         CreateMap<OrderedProductEntity, OrderedProduct>()
-            .ConstructUsing(src => OrderedProduct.Create(src.ProductId, src.Quantity, src.ProductName, src.Price).Value);
+            .ConstructUsing((src, context) =>
+            {
+                var result = OrderedProduct.Create(
+                    productId: src.ProductId,
+                    quantity: src.Quantity,
+                    productName: src.ProductName,
+                    price: src.Price
+                );
+
+                if (result.IsFailure)
+                {
+                    Result.Failure($"Cannot restore OrderedProduct from database: {result.Error}");
+                }
+
+                return result.Value;
+            });
     }
 }
