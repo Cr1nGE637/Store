@@ -17,13 +17,13 @@ public class Product
         Price = price;
     }
 
-    public static Result<Product> Create(Guid id, string name, string description, decimal price)
+    public static Result<Product> Create(string name, string description, decimal price)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             return Result.Failure<Product>("Product name is required");
         }
-        var product = new Product(id, name, description, price);
+        var product = new Product(Guid.NewGuid(), name, description, price);
         return Result.Success(product);
     }
 }
