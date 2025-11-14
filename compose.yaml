@@ -1,0 +1,31 @@
+﻿services:
+  store.api:
+    image: store.api
+    build:
+      context: .
+      dockerfile: Store.API/Dockerfile
+    depends_on:
+      - Database
+    networks:
+      - store_network
+    ports:
+      - "8080:8080"
+  
+  Database:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: Store
+    volumes:
+      - database_volume:/var/lib/postgres/data
+    networks:
+      - store_network
+    ports:
+      - "5432:5432"
+
+networks:
+  store_network:
+
+volumes:
+  database_volume:
