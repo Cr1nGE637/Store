@@ -28,11 +28,20 @@ public class OrderRepository : IOrderRepository
         
         return Result.Success(_mapper.Map<Order>(order));
     }
+    public async Task<Result<List<Order>>> GetByCustomerIdAsync(Guid customerId)
+    {
+        var orders = await _dbContext.Orders
+            .AsNoTracking()
+            .Where(c
+                => c.CustomerId == customerId)
+            .ToListAsync();
+        return Result.Success<List<Order>>(_mapper.Map<List<Order>>(orders));
+    }
     
     public async Task<Result<Order>> CreateAsync(Order order)
     {
         var orderEntity = _mapper.Map<OrderEntity>(order);
-        _dbContext.Add(orderEntity);
+        await _dbContext.Orders.AddAsync(orderEntity);
         await _dbContext.SaveChangesAsync();
         return Result.Success(_mapper.Map<Order>(orderEntity));
     }

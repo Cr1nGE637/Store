@@ -1,12 +1,13 @@
 using CSharpFunctionalExtensions;
 using Store.Application.DTOs;
+using Store.Application.Interfaces;
 using Store.Domain.Aggregates;
 using Store.Domain.Interfaces;
 using Store.Domain.ValueObjects;
 
 namespace Store.Application.Services;
 
-public class OrderService
+public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IProductService _productService;
@@ -21,7 +22,7 @@ public class OrderService
         return order.IsSuccess ? Result.Success(order.Value) : Result.Failure<Order>(order.Error);
     }
 
-    public async Task<Result> CreateOrderAsync(Guid customerId, List<OrderProductRequest> orderedProducts)
+    public async Task<Result> CreateOrderAsync(Guid customerId, List<OrderProductDto> orderedProducts)
     {
         var order = Order.Create(customerId);
         if (order.IsFailure)
@@ -51,7 +52,7 @@ public class OrderService
         return result.IsSuccess ? Result.Success() : Result.Failure(result.Error); 
     }
 
-    public async Task<Result> UpdateOrderAsync(Guid orderId, OrderProductRequest orderedProduct)
+    public async Task<Result> UpdateOrderAsync(Guid orderId, OrderProductDto orderedProduct)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
         if (order.IsFailure)

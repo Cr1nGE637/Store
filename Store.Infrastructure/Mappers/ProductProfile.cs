@@ -9,7 +9,7 @@ public class ProductProfile : Profile
     public ProductProfile()
     {
         CreateMap<ProductEntity, Product>()
-            .ConstructUsing(src => Product.Create(src.Name, src.Description, src.Price).Value);
+            .ConstructUsing(src => Product.Create(src.Name, src.Description, src.Price, src.Id).Value);
 
         CreateMap<Product, ProductEntity>();
     }

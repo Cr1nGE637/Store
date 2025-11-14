@@ -13,6 +13,11 @@
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="15.0.1" />
       <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+      <PackageReference Include="MediatR" Version="13.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="CQRS\Orders\Query\" />
     </ItemGroup>
 
 </Project>

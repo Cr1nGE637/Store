@@ -1,25 +1,34 @@
+using CSharpFunctionalExtensions;
+using Store.Domain.ValueObjects;
+
 namespace Store.Domain.Entities;
 
 public class Customer
 {
     public Guid Id { get; private set; }
     public string Name { get; private set; }
-    public string Email { get; private set; }
+    public Email Email { get; private set; }
 
-    private Customer(Guid id, string name, string email)
+    private Customer(Guid id, string name, Email email)
     {
         Id = id;
         Name = name;
         Email = email;
     }
 
-    public static Customer Create(Guid id, string name,  string email)
+    public static Result<Customer> Create(string name,  Email email, Guid id = default)
     {
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(name))
+        if (id == Guid.Empty)
         {
-            throw new ArgumentNullException(nameof(email));
+            id = Guid.NewGuid();
         }
+        
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return Result.Failure<Customer>("Name cannot be empty.");
+        }
+        
         var user = new Customer(id, name, email);
-        return user;
+        return Result.Success(user);
     }
 }
