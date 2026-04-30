@@ -6,6 +6,6 @@ namespace Users.Application.CQRS.Command;
 
 public class LoginCommand :  IRequest<Result<LoginDto>>
 {
-    public string Email { get; init; }
-    public string Password { get; init; }
+    public required string Email { get; init; }
+    public required string Password { get; init; }
 }

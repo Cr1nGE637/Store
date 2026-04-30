@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Users.Application.CQRS.Command;
 using Users.Application.CQRS.Query;
@@ -17,7 +18,7 @@ public class UsersController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("auth")]
+    [HttpPost("register")]
     public async Task<ActionResult<RegisterDto>> Register([FromBody] RegisterCommand command, CancellationToken token)
     {
         var result = await _mediator.Send(command, token);
@@ -31,13 +32,18 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<LoginDto>> Login([FromBody] LoginCommand command, CancellationToken token)
     {
         var result = await _mediator.Send(command, token);
+        if (result.IsSuccess)
+        {
+            Response.Cookies.Append("tasty-cookies", result.Value.Token);
+        }
         if (result.IsFailure)
             return BadRequest(result.Error);
         return Ok(result.Value);
     }
     
+    [Authorize]
     [HttpGet]
-    public async Task<ActionResult<List<GetUserDto>>> GetAllUsers([FromQuery] GetUserQuery query)
+    public async Task<ActionResult<GetUserDto>> GetUserByEmail([FromQuery] GetUserQuery query)
     {
         var result = await _mediator.Send(query);
         

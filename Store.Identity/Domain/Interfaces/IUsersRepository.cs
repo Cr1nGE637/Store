@@ -1,7 +1,7 @@
 using CSharpFunctionalExtensions;
 using Users.Domain.Entities;
 
-namespace Users.Application.Interfaces;
+namespace Users.Domain.Interfaces;
 
 public interface IUsersRepository
 {

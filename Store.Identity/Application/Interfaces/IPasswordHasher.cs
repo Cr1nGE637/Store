@@ -1,4 +1,4 @@
-namespace Store.SharedKernel.Interfaces;
+namespace Users.Application.Interfaces;
 
 public interface IPasswordHasher
 {

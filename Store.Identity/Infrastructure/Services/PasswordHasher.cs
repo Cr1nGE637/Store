@@ -1,4 +1,4 @@
-using Store.SharedKernel.Interfaces;
+using Users.Application.Interfaces;
 
 namespace Users.Infrastructure.Services;
 

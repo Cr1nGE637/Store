@@ -9,16 +9,24 @@ public class UsersConfiguration : IEntityTypeConfiguration<UserEntity>
     public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
         builder.HasKey(c => c.Id);
-        
+
         builder.Property(c => c.Id)
-            .ValueGeneratedOnAdd()
-            .IsRequired();
-        
+            .ValueGeneratedNever();
+
         builder.Property(c => c.Email)
-            .IsRequired();
-        
+            .IsRequired()
+            .HasMaxLength(254);
+
+        builder.HasIndex(c => c.Email)
+            .IsUnique();
+
         builder.Property(c => c.Name)
             .IsRequired()
             .HasMaxLength(50);
+
+        builder.Property(c => c.Role)
+            .IsRequired()
+            .HasMaxLength(20)
+            .HasDefaultValue("Customer");
     }
 }

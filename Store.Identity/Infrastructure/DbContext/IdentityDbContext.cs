@@ -10,5 +10,6 @@ public class IdentityDbContext(DbContextOptions<IdentityDbContext> options) :  M
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("identity");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);
     }
 }

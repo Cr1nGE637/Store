@@ -1,4 +1,5 @@
 using CSharpFunctionalExtensions;
+using Users.Domain.Enums;
 using Users.Domain.ValueObjects;
 
 namespace Users.Domain.Entities;
@@ -9,28 +10,25 @@ public class User
     public string Name { get; private set; }
     public string Password { get; private set; }
     public Email Email { get; private set; }
+    public UserRole Role { get; private set; }
 
-    private User(Guid id, string name, Email email, string password)
+    private User(Guid id, string name, Email email, string password, UserRole role)
     {
         Id = id;
         Name = name;
         Email = email;
         Password = password;
+        Role = role;
     }
 
-    public static Result<User> Create(string name,  Email email, string password, Guid id = default)
+    public static Result<User> Create(string name, Email email, string password, UserRole role = UserRole.Customer, Guid id = default)
     {
         if (id == Guid.Empty)
-        {
             id = Guid.NewGuid();
-        }
-        
+
         if (string.IsNullOrWhiteSpace(name))
-        {
             return Result.Failure<User>("Name cannot be empty.");
-        }
-        
-        var user = new User(id, name, email, password);
-        return Result.Success(user);
+
+        return Result.Success(new User(id, name, email, password, role));
     }
 }

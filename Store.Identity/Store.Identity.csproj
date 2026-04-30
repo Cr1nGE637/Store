@@ -25,8 +25,4 @@
       <ProjectReference Include="..\Store.SharedKernel\Store.SharedKernel.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Domain\Interfaces\" />
-    </ItemGroup>
-
 </Project>

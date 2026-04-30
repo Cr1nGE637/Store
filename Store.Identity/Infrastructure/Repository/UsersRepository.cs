@@ -1,8 +1,9 @@
 using AutoMapper;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
-using Users.Application.Interfaces;
 using Users.Domain.Entities;
+using Users.Domain.Enums;
+using Users.Domain.Interfaces;
 using Users.Domain.ValueObjects;
 using Users.Infrastructure.DbContext;
 using Users.Infrastructure.Entity;
@@ -29,22 +30,24 @@ public class UsersRepository : IUsersRepository
 
     public async Task<bool> ExistsByEmailAsync(string email)
     {
-        var userEntity = await _dbContext.Users
+        var normalized = email.Trim().ToLowerInvariant();
+        return await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == email);
-        return userEntity != null;
+            .AnyAsync(u => u.Email == normalized);
     }
+
     public async Task<Result<User>> GetByEmailAsync(string email)
     {
+        var normalized = email.Trim().ToLowerInvariant();
         var userEntity = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Email == email);
+            .FirstOrDefaultAsync(c => c.Email == normalized);
         if (userEntity == null)
-        {
             return Result.Failure<User>("Email not found");
-        }
-        var emailVo = Email.Create(email);
-        var user = User.Create(userEntity.Name, emailVo.Value, userEntity.Password);
+
+        var emailVo = Email.Create(userEntity.Email);
+        var role = Enum.Parse<UserRole>(userEntity.Role);
+        var user = User.Create(userEntity.Name, emailVo.Value, userEntity.Password, role, userEntity.Id);
         return Result.Success(user.Value);
     }
 

@@ -13,7 +13,7 @@ public class Email : ValueObject
         if (string.IsNullOrWhiteSpace(email))
             return Result.Failure<Email>("Email can not be empty.");
 
-        email = email.Trim();
+        email = email.Trim().ToLowerInvariant();
 
         if (email.Length > MaxLength)
             return Result.Failure<Email>($"Email can not be longer than {MaxLength} characters.");
@@ -45,6 +45,6 @@ public class Email : ValueObject
     
     protected override IEnumerable<object> GetEqualityComponents()
     {
-        yield return Value.ToLowerInvariant();
+        yield return Value;
     }
 }

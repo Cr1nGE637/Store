@@ -1,6 +1,3 @@
 namespace Users.Application.DTOs;
 
-public class GetUserDto
-{
-    
-}
+public record GetUserDto(string Email, string Name, string Role);

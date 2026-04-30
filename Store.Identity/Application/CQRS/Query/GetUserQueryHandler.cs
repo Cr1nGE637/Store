@@ -1,26 +1,25 @@
-using AutoMapper;
 using CSharpFunctionalExtensions;
 using MediatR;
 using Users.Application.DTOs;
-using Users.Application.Interfaces;
+using Users.Domain.Interfaces;
 
 namespace Users.Application.CQRS.Query;
 
-public class GetCustomerQueryHandler : IRequestHandler<GetUserQuery, Result<List<GetUserDto>>>
+public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<GetUserDto>>
 {
     private readonly IUsersRepository _usersRepository;
-    private readonly IMapper _mapper;
 
-    public GetCustomerQueryHandler(IUsersRepository usersRepository, IMapper mapper)
+    public GetUserQueryHandler(IUsersRepository usersRepository)
     {
         _usersRepository = usersRepository;
-        _mapper = mapper;
     }
 
-    public async Task<Result<List<GetUserDto>>> Handle(GetUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetUserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var users = await _usersRepository.GetByEmailAsync("asdasd"); 
-        var userDtos = _mapper.Map<List<GetUserDto>>(users.Value);
-        return Result.Success(userDtos);
+        var userResult = await _usersRepository.GetByEmailAsync(request.Email);
+        if (userResult.IsFailure)
+            return Result.Failure<GetUserDto>(userResult.Error);
+
+        return Result.Success(new GetUserDto(userResult.Value.Email, userResult.Value.Name, userResult.Value.Role.ToString()));
     }
 }
