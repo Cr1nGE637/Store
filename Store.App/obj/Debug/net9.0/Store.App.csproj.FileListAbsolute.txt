@@ -37,11 +37,9 @@ D:\Lab\Store\Store.App\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
-D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Application.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Domain.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Infrastructure.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.SharedKernel.dll
-D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Application.pdb
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Infrastructure.pdb
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Domain.pdb
 D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.SharedKernel.pdb
@@ -153,3 +151,6 @@ D:\Lab\Store\Store.App\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.MSB
 D:\Lab\Store\Store.App\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\Lab\Store\Store.App\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+D:\Lab\Store\Store.App\bin\Debug\net9.0\System.Diagnostics.DiagnosticSource.dll
+D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Catalog.dll
+D:\Lab\Store\Store.App\bin\Debug\net9.0\Store.Catalog.pdb

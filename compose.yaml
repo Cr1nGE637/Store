@@ -13,6 +13,7 @@
     environment:
       - ConnectionStrings__DbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***
       - ConnectionStrings__IdentityDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=identity
+      - ConnectionStrings__CatalogDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=catalog
   
   Database:
     image: postgres:latest

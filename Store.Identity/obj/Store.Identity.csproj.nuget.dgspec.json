@@ -50,7 +50,7 @@
           "dependencies": {
             "AutoMapper": {
               "target": "Package",
-              "version": "[15.0.1, )"
+              "version": "[16.1.1, )"
             },
             "BCrypt.Net-Core": {
               "target": "Package",

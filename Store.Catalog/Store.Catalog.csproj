@@ -7,18 +7,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="API\Controllers\" />
-      <Folder Include="Application\CQRS\Command\" />
-      <Folder Include="Application\CQRS\Query\" />
-      <Folder Include="Application\DTOs\" />
-      <Folder Include="Domain\Aggregates\" />
-      <Folder Include="Domain\Entities\" />
-      <Folder Include="Domain\Interfaces\" />
-      <Folder Include="Infrastructure\Configuration\" />
-      <Folder Include="Infrastructure\DbContext\" />
-      <Folder Include="Infrastructure\Entity\" />
-      <Folder Include="Infrastructure\Mappers\" />
-      <Folder Include="Infrastructure\Repository\" />
+      <ProjectReference Include="..\Store.SharedKernel\Store.SharedKernel.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="16.1.1" />
+      <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+      <PackageReference Include="MediatR" Version="13.1.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
     </ItemGroup>
 
 </Project>

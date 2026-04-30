@@ -44,10 +44,6 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
-            "AutoMapper": {
-              "target": "Package",
-              "version": "[15.0.1, )"
-            },
             "CSharpFunctionalExtensions": {
               "target": "Package",
               "version": "[3.6.0, )"
@@ -119,7 +115,7 @@
           "dependencies": {
             "AutoMapper": {
               "target": "Package",
-              "version": "[15.0.1, )"
+              "version": "[16.1.1, )"
             },
             "CSharpFunctionalExtensions": {
               "target": "Package",
