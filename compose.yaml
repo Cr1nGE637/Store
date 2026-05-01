@@ -11,9 +11,10 @@
     ports:
       - "8080:8080"
     environment:
-      - ConnectionStrings__DbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***
       - ConnectionStrings__IdentityDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=identity
       - ConnectionStrings__CatalogDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=catalog
+      - ConnectionStrings__CartDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=cart
+      - ConnectionStrings__OrderingDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=ordering
   
   Database:
     image: postgres:latest

@@ -1,6 +1,6 @@
-using Users.Domain.Entities;
+using Identity.Domain.Entities;
 
-namespace Users.Application.Interfaces;
+namespace Identity.Application.Interfaces;
 
 public interface IJwtProvider
 {

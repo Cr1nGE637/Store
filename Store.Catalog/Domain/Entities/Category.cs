@@ -1,8 +1,9 @@
 using CSharpFunctionalExtensions;
+using Store.SharedKernel;
 
 namespace Store.Catalog.Domain.Entities;
 
-public class Category
+public class Category : AggregateRoot
 {
     public Guid CategoryId { get; private set; }
     public string CategoryName { get; private set; }

@@ -1,13 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Identity.Application.Interfaces;
+using Identity.Domain.Entities;
+using Identity.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Users.Application.Interfaces;
-using Users.Domain.Entities;
-using Users.Infrastructure.Configuration;
 
-namespace Users.Infrastructure.Services;
+namespace Identity.Infrastructure.Services;
 
 public class JwtProvider : IJwtProvider
 {

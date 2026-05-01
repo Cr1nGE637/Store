@@ -1,8 +1,8 @@
 using CSharpFunctionalExtensions;
+using Identity.Application.DTOs;
 using MediatR;
-using Users.Application.DTOs;
 
-namespace Users.Application.CQRS.Command;
+namespace Identity.Application.CQRS.Command;
 
 public class RegisterCommand : IRequest<Result<RegisterDto>>
 {

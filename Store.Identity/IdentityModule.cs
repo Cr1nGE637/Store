@@ -1,17 +1,15 @@
+using Identity.Application.CQRS.Command;
+using Identity.Application.Interfaces;
+using Identity.Domain.Interfaces;
+using Identity.Infrastructure.Configuration;
+using Identity.Infrastructure.DbContexts;
+using Identity.Infrastructure.Repository;
+using Identity.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Store.SharedKernel.Interfaces;
-using Users.Application.CQRS.Command;
-using Users.Application.Interfaces;
-using Users.Domain.Interfaces;
-using Users.Infrastructure.Configuration;
-using Users.Infrastructure.DbContext;
-using Users.Infrastructure.Mappers;
-using Users.Infrastructure.Repository;
-using Users.Infrastructure.Services;
 
-namespace Users;
+namespace Identity;
 
 public static class IdentityModule
 {
@@ -27,12 +25,10 @@ public static class IdentityModule
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(RegisterCommand).Assembly));
 
-        services.AddAutoMapper(cfg => cfg.AddMaps(typeof(UsersProfile).Assembly));
-
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IUsersRepository, UsersRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IIdentityUnitOfWork, UnitOfWork>();
 
         return services;
     }

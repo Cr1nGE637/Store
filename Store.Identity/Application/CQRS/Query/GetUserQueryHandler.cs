@@ -1,9 +1,10 @@
 using CSharpFunctionalExtensions;
+using Identity.Application.DTOs;
+using Identity.Domain.Entities;
+using Identity.Domain.Interfaces;
 using MediatR;
-using Users.Application.DTOs;
-using Users.Domain.Interfaces;
 
-namespace Users.Application.CQRS.Query;
+namespace Identity.Application.CQRS.Query;
 
 public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<GetUserDto>>
 {
@@ -20,6 +21,8 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<GetUserD
         if (userResult.IsFailure)
             return Result.Failure<GetUserDto>(userResult.Error);
 
-        return Result.Success(new GetUserDto(userResult.Value.Email, userResult.Value.Name, userResult.Value.Role.ToString()));
+        return Result.Success(MapToDto(userResult.Value));
     }
+
+    private static GetUserDto MapToDto(User user) => new(user.Email, user.Name, user.Role.ToString());
 }

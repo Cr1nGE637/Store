@@ -1,0 +1,48 @@
+# Build output
+bin/
+obj/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Roslyn analyzers cache
+.cache/
+
+# Entity Framework migrations snapshots are intentional — keep them tracked
+
+# .NET secrets & local config
+appsettings.Local.json
+secrets.json
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/

@@ -6,4 +6,40 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\Store.SharedKernel\Store.SharedKernel.csproj" />
+        <ProjectReference Include="..\Store.Carts.Contracts\Store.Carts.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+        <PackageReference Include="MediatR" Version="13.1.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="obj\Debug\net9.0\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Store.SharedKernel\Store.SharedKernel.csproj" />
+        <ProjectReference Include="..\Store.Carts.Contracts\Store.Carts.Contracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+        <PackageReference Include="MediatR" Version="13.1.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+    </ItemGroup>
+
 </Project>

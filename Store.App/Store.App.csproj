@@ -20,8 +20,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Store.Cart\Store.Carts.csproj" />
+      <ProjectReference Include="..\Store.Ordering\Store.Ordering.csproj" />
       <ProjectReference Include="..\Store.Catalog\Store.Catalog.csproj" />
-      <ProjectReference Include="..\Store.Infrastructure\Store.Infrastructure.csproj" />
       <ProjectReference Include="..\Store.Identity\Store.Identity.csproj" />
     </ItemGroup>
 
@@ -29,6 +30,10 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="obj\Debug\net9.0\" />
     </ItemGroup>
 
 </Project>

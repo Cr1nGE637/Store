@@ -1,10 +1,11 @@
 using CSharpFunctionalExtensions;
-using Users.Domain.Enums;
-using Users.Domain.ValueObjects;
+using Identity.Domain.Enums;
+using Identity.Domain.ValueObjects;
+using Store.SharedKernel;
 
-namespace Users.Domain.Entities;
+namespace Identity.Domain.Entities;
 
-public class User
+public class User : AggregateRoot
 {
     public Guid Id { get; private set; }
     public string Name { get; private set; }
@@ -21,14 +22,14 @@ public class User
         Role = role;
     }
 
-    public static Result<User> Create(string name, Email email, string password, UserRole role = UserRole.Customer, Guid id = default)
+    public static Result<User> Create(string name, Email email, string password, UserRole role = UserRole.Customer)
     {
-        if (id == Guid.Empty)
-            id = Guid.NewGuid();
-
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<User>("Name cannot be empty.");
 
-        return Result.Success(new User(id, name, email, password, role));
+        return Result.Success(new User(Guid.NewGuid(), name, email, password, role));
     }
+
+    internal static User Reconstitute(Guid id, string name, Email email, string password, UserRole role) =>
+        new(id, name, email, password, role);
 }

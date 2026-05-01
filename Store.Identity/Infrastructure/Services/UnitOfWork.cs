@@ -1,9 +1,9 @@
-using Store.SharedKernel.Interfaces;
-using Users.Infrastructure.DbContext;
+using Identity.Application.Interfaces;
+using Identity.Infrastructure.DbContexts;
 
-namespace Users.Infrastructure.Services;
+namespace Identity.Infrastructure.Services;
 
-public class UnitOfWork  : IUnitOfWork
+public class UnitOfWork : IIdentityUnitOfWork
 {
     private readonly IdentityDbContext  _dbContext;
 

@@ -1,11 +1,11 @@
+using Identity.Application.CQRS.Command;
+using Identity.Application.CQRS.Query;
+using Identity.Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Users.Application.CQRS.Command;
-using Users.Application.CQRS.Query;
-using Users.Application.DTOs;
 
-namespace Users.API.Controllers;
+namespace Identity.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]

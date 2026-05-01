@@ -1,6 +1,6 @@
 using CSharpFunctionalExtensions;
 
-namespace Users.Domain.ValueObjects;
+namespace Identity.Domain.ValueObjects;
 
 public class Email : ValueObject
 {

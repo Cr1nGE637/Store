@@ -4,12 +4,11 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>Users</RootNamespace>
+        <RootNamespace>Identity</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutoMapper" Version="16.1.1" />
-      <PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
+<PackageReference Include="BCrypt.Net-Core" Version="1.6.0" />
       <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
       <PackageReference Include="MediatR" Version="13.1.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
@@ -23,6 +22,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Store.SharedKernel\Store.SharedKernel.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="obj\Debug\net9.0\" />
     </ItemGroup>
 
 </Project>

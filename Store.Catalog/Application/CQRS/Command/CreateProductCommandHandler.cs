@@ -3,7 +3,6 @@ using MediatR;
 using Store.Catalog.Application.DTOs;
 using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
-using Store.Catalog.Contracts.Events;
 using Store.Catalog.Domain.Interfaces;
 
 namespace Store.Catalog.Application.CQRS.Command;
@@ -31,16 +30,14 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         if (productResult.IsFailure)
             return Result.Failure<CreateProductDto>(productResult.Error);
 
-        await _productRepository.AddAsync(productResult.Value);
+        var product = productResult.Value;
+        await _productRepository.AddAsync(product);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await _publisher.Publish(new ProductCreatedEvent(
-            productResult.Value.ProductId,
-            productResult.Value.ProductName,
-            productResult.Value.ProductPrice,
-            productResult.Value.CategoryId), cancellationToken);
+        foreach (var domainEvent in product.DomainEvents)
+            await _publisher.Publish(domainEvent, cancellationToken);
 
-        return Result.Success(MapToDto(productResult.Value));
+        return Result.Success(MapToDto(product));
     }
 
     private static CreateProductDto MapToDto(Product p) =>

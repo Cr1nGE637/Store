@@ -2,7 +2,6 @@ using CSharpFunctionalExtensions;
 using MediatR;
 using Store.Catalog.Application.DTOs;
 using Store.Catalog.Application.Interfaces;
-using Store.Catalog.Contracts.Events;
 using Store.Catalog.Domain.Entities;
 using Store.Catalog.Domain.Interfaces;
 
@@ -27,17 +26,19 @@ public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand,
         if (productResult.IsFailure)
             return Result.Failure<GetProductDto>("Product not found");
 
-        var deleteResult = await _productRepository.DeleteAsync(productResult.Value.ProductId);
+        var product = productResult.Value;
+        product.Delete();
+
+        var deleteResult = await _productRepository.DeleteAsync(product.ProductId);
         if (deleteResult.IsFailure)
             return Result.Failure<GetProductDto>(deleteResult.Error);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await _publisher.Publish(new ProductDeletedEvent(
-            productResult.Value.ProductId,
-            productResult.Value.ProductName), cancellationToken);
+        foreach (var domainEvent in product.DomainEvents)
+            await _publisher.Publish(domainEvent, cancellationToken);
 
-        return Result.Success(MapToDto(productResult.Value));
+        return Result.Success(MapToDto(product));
     }
 
     private static GetProductDto MapToDto(Product p) =>

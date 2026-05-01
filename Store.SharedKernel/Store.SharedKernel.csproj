@@ -6,4 +6,15 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+
+    <ItemGroup>
+        <PackageReference Include="MediatR" Version="13.1.0" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Folder Include="Interfaces\" />
+      <Folder Include="obj\Debug\net9.0\" />
+    </ItemGroup>
+
 </Project>

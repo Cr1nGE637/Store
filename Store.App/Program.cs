@@ -1,29 +1,27 @@
+using Identity;
+using Identity.Infrastructure.DbContexts;
 using Microsoft.AspNetCore.CookiePolicy;
-using Store.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Store.App.Extensions;
 using Store.Catalog;
-using Store.Catalog.Infrastructure.DbContext;
-using Store.Domain.Interfaces;
-using Store.Infrastructure.Repositories;
-using Users;
-using Users.Infrastructure.DbContext;
+using Store.Catalog.Infrastructure.DbContexts;
+using Store.Carts;
+using Store.Carts.Infrastructure.DbContexts;
+using Store.Ordering;
+using Store.Ordering.Infrastructure.DbContexts;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerWithBearer();
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Services.AddDbContext<StoreDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionString")));
-
 builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddCatalogModule(builder.Configuration);
-
-builder.Services.AddScoped<ICustomersRepository, CustomersRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddCartModule(builder.Configuration);
+builder.Services.AddOrderingModule(builder.Configuration);
 
 var app = builder.Build();
 
@@ -41,7 +39,8 @@ using (var scope = app.Services.CreateScope())
     
     await services.ApplyMigrationsAsync<IdentityDbContext>();
     await services.ApplyMigrationsAsync<CatalogDbContext>();
-
+    await services.ApplyMigrationsAsync<CartDbContext>();
+    await services.ApplyMigrationsAsync<OrderingDbContext>();
 }
 
 app.UseCookiePolicy(new CookiePolicyOptions
