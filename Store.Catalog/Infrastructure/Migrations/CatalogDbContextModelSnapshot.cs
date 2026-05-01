@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Store.Catalog.Infrastructure.DbContext;
+using Store.Catalog.Infrastructure.DbContexts;
 
 #nullable disable
 
@@ -23,10 +23,29 @@ namespace Store.Catalog.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.CategoryEntity", b =>
+                {
+                    b.Property<Guid>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("CategoryId");
+
+                    b.ToTable("Categories", "catalog");
+                });
+
             modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductEntity", b =>
                 {
                     b.Property<Guid>("ProductId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("ProductDescription")
@@ -44,7 +63,18 @@ namespace Store.Catalog.Infrastructure.Migrations
 
                     b.HasKey("ProductId");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Products", "catalog");
+                });
+
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductEntity", b =>
+                {
+                    b.HasOne("Store.Catalog.Infrastructure.Entity.CategoryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

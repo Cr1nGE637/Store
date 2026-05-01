@@ -3,11 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Store.Catalog.Application.CQRS.Command;
 using Store.Catalog.Domain.Interfaces;
-using Store.Catalog.Infrastructure.DbContext;
-using Store.Catalog.Infrastructure.Mappers;
 using Store.Catalog.Infrastructure.Repository;
+using Store.Catalog.Application.Interfaces;
+using Store.Catalog.Infrastructure.DbContexts;
 using Store.Catalog.Infrastructure.Services;
-using Store.SharedKernel.Interfaces;
 
 namespace Store.Catalog;
 
@@ -23,10 +22,9 @@ public static class CatalogModule
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
 
-        services.AddAutoMapper(cfg => cfg.AddMaps(typeof(ProductProfile).Assembly));
-
         services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ICatalogUnitOfWork, UnitOfWork>();
 
         return services;
     }

@@ -10,4 +10,5 @@ public class UpdateProductCommand : IRequest<Result<GetProductDto>>
     public string ProductName { get; init; } = string.Empty;
     public string ProductDescription { get; init; } = string.Empty;
     public decimal ProductPrice { get; init; }
+    public Guid CategoryId { get; init; }
 }

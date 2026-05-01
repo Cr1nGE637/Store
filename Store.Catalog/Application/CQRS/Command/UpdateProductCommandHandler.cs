@@ -1,24 +1,24 @@
-using AutoMapper;
 using CSharpFunctionalExtensions;
 using MediatR;
 using Store.Catalog.Application.DTOs;
+using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
+using Store.Catalog.Domain.Events;
 using Store.Catalog.Domain.Interfaces;
-using Store.SharedKernel.Interfaces;
 
 namespace Store.Catalog.Application.CQRS.Command;
 
 public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Result<GetProductDto>>
 {
     private readonly IProductRepository _productRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+    private readonly ICatalogUnitOfWork _unitOfWork;
+    private readonly IPublisher _publisher;
 
-    public UpdateProductCommandHandler(IProductRepository productRepository, IUnitOfWork unitOfWork, IMapper mapper)
+    public UpdateProductCommandHandler(IProductRepository productRepository, ICatalogUnitOfWork unitOfWork, IPublisher publisher)
     {
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
+        _publisher = publisher;
     }
 
     public async Task<Result<GetProductDto>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -27,16 +27,25 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         if (existingResult.IsFailure)
             return Result.Failure<GetProductDto>("Product not found");
 
-        var updatedResult = Product.Create(request.ProductName, request.ProductDescription, request.ProductPrice, request.ProductId);
-        if (updatedResult.IsFailure)
-            return Result.Failure<GetProductDto>(updatedResult.Error);
+        var product = existingResult.Value;
+        decimal oldPrice = product.ProductPrice;
 
-        var savedResult = await _productRepository.UpdateAsync(updatedResult.Value);
+        var updateResult = product.Update(request.ProductName, request.ProductDescription, request.ProductPrice, request.CategoryId);
+        if (updateResult.IsFailure)
+            return Result.Failure<GetProductDto>(updateResult.Error);
+
+        var savedResult = await _productRepository.UpdateAsync(product);
         if (savedResult.IsFailure)
             return Result.Failure<GetProductDto>(savedResult.Error);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(_mapper.Map<GetProductDto>(savedResult.Value));
+        if (oldPrice != request.ProductPrice)
+            await _publisher.Publish(new ProductPriceChangedEvent(request.ProductId, oldPrice, request.ProductPrice), cancellationToken);
+
+        return Result.Success(MapToDto(savedResult.Value));
     }
+
+    private static GetProductDto MapToDto(Product p) =>
+        new(p.ProductId, p.ProductName, p.ProductDescription, p.ProductPrice, p.CategoryId);
 }

@@ -1,9 +1,9 @@
-using Store.Catalog.Infrastructure.DbContext;
-using Store.SharedKernel.Interfaces;
+using Store.Catalog.Application.Interfaces;
+using Store.Catalog.Infrastructure.DbContexts;
 
 namespace Store.Catalog.Infrastructure.Services;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork : ICatalogUnitOfWork
 {
     private readonly CatalogDbContext _dbContext;
 

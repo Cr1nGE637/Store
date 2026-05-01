@@ -6,22 +6,22 @@ using Store.Catalog.Domain.Interfaces;
 
 namespace Store.Catalog.Application.CQRS.Query;
 
-public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<List<GetProductDto>>>
+public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, Result<GetProductDto>>
 {
     private readonly IProductRepository _productRepository;
 
-    public GetProductsQueryHandler(IProductRepository productRepository)
+    public GetProductByIdQueryHandler(IProductRepository productRepository)
     {
         _productRepository = productRepository;
     }
 
-    public async Task<Result<List<GetProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetProductDto>> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
     {
-        var result = await _productRepository.GetAllAsync();
+        var result = await _productRepository.GetByIdAsync(request.ProductId);
         if (result.IsFailure)
-            return Result.Failure<List<GetProductDto>>(result.Error);
+            return Result.Failure<GetProductDto>(result.Error);
 
-        return Result.Success(result.Value.Select(MapToDto).ToList());
+        return Result.Success(MapToDto(result.Value));
     }
 
     private static GetProductDto MapToDto(Product p) =>
