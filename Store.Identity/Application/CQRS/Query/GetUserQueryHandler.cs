@@ -1,10 +1,11 @@
-using CSharpFunctionalExtensions;
-using Identity.Application.DTOs;
-using Identity.Domain.Entities;
-using Identity.Domain.Interfaces;
+﻿using CSharpFunctionalExtensions;
+using Store.Identity.Application.DTOs;
+using Store.Identity.Domain.Aggregates;
+using Store.Identity.Domain.Interfaces;
+using Store.Identity.Domain.ValueObjects;
 using MediatR;
 
-namespace Identity.Application.CQRS.Query;
+namespace Store.Identity.Application.CQRS.Query;
 
 public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<GetUserDto>>
 {
@@ -17,12 +18,14 @@ public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<GetUserD
 
     public async Task<Result<GetUserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var userResult = await _usersRepository.GetByEmailAsync(request.Email);
+        var emailResult = Email.Create(request.Email);
+        if (emailResult.IsFailure)
+            return Result.Failure<GetUserDto>(emailResult.Error);
+
+        var userResult = await _usersRepository.GetByEmailAsync(emailResult.Value.Value);
         if (userResult.IsFailure)
             return Result.Failure<GetUserDto>(userResult.Error);
 
-        return Result.Success(MapToDto(userResult.Value));
+        return Result.Success(IdentityMappings.ToGetUserDto(userResult.Value));
     }
-
-    private static GetUserDto MapToDto(User user) => new(user.Email, user.Name, user.Role.ToString());
 }

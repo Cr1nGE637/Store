@@ -23,7 +23,7 @@ namespace Store.Ordering.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Store.Ordering.Infrastructure.Entities.OrderEntity", b =>
+            modelBuilder.Entity("Store.Ordering.Infrastructure.Entity.OrderEntity", b =>
                 {
                     b.Property<Guid>("OrderId")
                         .ValueGeneratedOnAdd()
@@ -52,7 +52,7 @@ namespace Store.Ordering.Infrastructure.Migrations
                     b.ToTable("Orders", "ordering");
                 });
 
-            modelBuilder.Entity("Store.Ordering.Infrastructure.Entities.OrderedProductEntity", b =>
+            modelBuilder.Entity("Store.Ordering.Infrastructure.Entity.OrderedProductEntity", b =>
                 {
                     b.Property<Guid>("OrderedProductId")
                         .ValueGeneratedOnAdd()
@@ -82,16 +82,16 @@ namespace Store.Ordering.Infrastructure.Migrations
                     b.ToTable("OrderedProducts", "ordering");
                 });
 
-            modelBuilder.Entity("Store.Ordering.Infrastructure.Entities.OrderedProductEntity", b =>
+            modelBuilder.Entity("Store.Ordering.Infrastructure.Entity.OrderedProductEntity", b =>
                 {
-                    b.HasOne("Store.Ordering.Infrastructure.Entities.OrderEntity", null)
+                    b.HasOne("Store.Ordering.Infrastructure.Entity.OrderEntity", null)
                         .WithMany("Products")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Store.Ordering.Infrastructure.Entities.OrderEntity", b =>
+            modelBuilder.Entity("Store.Ordering.Infrastructure.Entity.OrderEntity", b =>
                 {
                     b.Navigation("Products");
                 });

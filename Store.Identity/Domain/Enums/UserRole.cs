@@ -1,4 +1,4 @@
-namespace Identity.Domain.Enums;
+﻿namespace Store.Identity.Domain.Enums;
 
 public enum UserRole
 {

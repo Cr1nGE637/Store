@@ -1,6 +1,6 @@
 using CSharpFunctionalExtensions;
 using Store.Ordering.Domain.Enums;
-using Store.Ordering.Domain.Events;
+using Store.Ordering.Contracts.Events;
 using Store.Ordering.Domain.ValueObjects;
 using Store.SharedKernel;
 
@@ -54,8 +54,10 @@ public class Order : AggregateRoot
 
     public Result MarkAsPaid()
     {
-        if (Status != OrderStatus.Unpaid)
-            return Result.Failure("Only unpaid orders can be paid");
+        if (Status == OrderStatus.Paid)
+            return Result.Failure("Order is already paid");
+        if (Status == OrderStatus.Cancelled)
+            return Result.Failure("Cancelled orders cannot be paid");
 
         Status = OrderStatus.Paid;
         PaidAt = DateTime.UtcNow;

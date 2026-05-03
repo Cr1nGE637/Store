@@ -17,15 +17,22 @@ public class CancelOrderCommandHandler(
             return Result.Failure(orderResult.Error);
 
         var order = orderResult.Value;
+        if (!request.IsManager && order.CustomerId != request.RequesterId)
+            return Result.Failure("Access denied");
+
         var cancelResult = order.Cancel();
         if (cancelResult.IsFailure)
             return cancelResult;
 
-        await orderRepository.UpdateAsync(order);
+        var updateResult = await orderRepository.UpdateAsync(order);
+        if (updateResult.IsFailure)
+            return updateResult;
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         foreach (var domainEvent in order.DomainEvents)
             await publisher.Publish(domainEvent, cancellationToken);
+        order.ClearDomainEvents();
 
         return Result.Success();
     }

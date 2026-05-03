@@ -1,11 +1,11 @@
-using CSharpFunctionalExtensions;
-using Identity.Application.DTOs;
-using Identity.Application.Interfaces;
-using Identity.Domain.Entities;
-using Identity.Domain.Interfaces;
+﻿using CSharpFunctionalExtensions;
+using Store.Identity.Application.DTOs;
+using Store.Identity.Application.Interfaces;
+using Store.Identity.Domain.Aggregates;
+using Store.Identity.Domain.Interfaces;
 using MediatR;
 
-namespace Identity.Application.CQRS.Command;
+namespace Store.Identity.Application.CQRS.Command;
 
 public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginDto>>
 {
@@ -31,8 +31,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginDto
             return Result.Failure<LoginDto>("Invalid email or password");
 
         var token = _jwtProvider.GenerateJwtToken(userResult.Value);
-        return Result.Success(MapToDto(userResult.Value, token));
+        return Result.Success(IdentityMappings.ToLoginDto(userResult.Value, token));
     }
-
-    private static LoginDto MapToDto(User user, string token) => new(user.Email, token, user.Role.ToString());
 }

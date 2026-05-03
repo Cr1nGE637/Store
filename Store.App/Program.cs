@@ -1,5 +1,5 @@
-using Identity;
-using Identity.Infrastructure.DbContexts;
+﻿using Store.Identity;
+using Store.Identity.Infrastructure.DbContexts;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
 using Store.App.Extensions;
@@ -31,18 +31,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    
-    await services.ApplyMigrationsAsync<IdentityDbContext>();
-    await services.ApplyMigrationsAsync<CatalogDbContext>();
-    await services.ApplyMigrationsAsync<CartDbContext>();
-    await services.ApplyMigrationsAsync<OrderingDbContext>();
-}
-
 app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.Strict,
@@ -52,5 +40,17 @@ app.UseCookiePolicy(new CookiePolicyOptions
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    await services.ApplyMigrationsAsync<IdentityDbContext>();
+    await services.ApplyMigrationsAsync<CatalogDbContext>();
+    await services.ApplyMigrationsAsync<CartDbContext>();
+    await services.ApplyMigrationsAsync<OrderingDbContext>();
+}
 
 app.Run();

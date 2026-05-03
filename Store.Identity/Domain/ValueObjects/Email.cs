@@ -1,6 +1,6 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 
-namespace Identity.Domain.ValueObjects;
+namespace Store.Identity.Domain.ValueObjects;
 
 public class Email : ValueObject
 {
@@ -38,8 +38,6 @@ public class Email : ValueObject
             return false;
         }
     }
-    
-    public static implicit operator string(Email email) => email?.Value ?? string.Empty;
     
     public override string ToString() => Value;
     

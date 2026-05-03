@@ -1,6 +1,6 @@
-using Identity.Domain.Entities;
+﻿using Store.Identity.Domain.Aggregates;
 
-namespace Identity.Application.Interfaces;
+namespace Store.Identity.Application.Interfaces;
 
 public interface IJwtProvider
 {

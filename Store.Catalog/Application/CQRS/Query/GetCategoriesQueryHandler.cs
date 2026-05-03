@@ -21,8 +21,6 @@ public class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, Res
         if (result.IsFailure)
             return Result.Failure<List<GetCategoryDto>>(result.Error);
 
-        return Result.Success(result.Value.Select(MapToDto).ToList());
+        return Result.Success(result.Value.Select(CatalogMappings.ToGetCategoryDto).ToList());
     }
-
-    private static GetCategoryDto MapToDto(Category c) => new(c.CategoryId, c.CategoryName);
 }

@@ -37,10 +37,8 @@ public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand,
 
         foreach (var domainEvent in product.DomainEvents)
             await _publisher.Publish(domainEvent, cancellationToken);
+        product.ClearDomainEvents();
 
-        return Result.Success(MapToDto(product));
+        return Result.Success(CatalogMappings.ToGetProductDto(product));
     }
-
-    private static GetProductDto MapToDto(Product p) =>
-        new(p.ProductId, p.ProductName, p.ProductDescription, p.ProductPrice, p.CategoryId);
 }

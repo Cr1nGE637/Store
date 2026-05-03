@@ -36,10 +36,8 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
         foreach (var domainEvent in product.DomainEvents)
             await _publisher.Publish(domainEvent, cancellationToken);
+        product.ClearDomainEvents();
 
-        return Result.Success(MapToDto(product));
+        return Result.Success(CatalogMappings.ToCreateProductDto(product));
     }
-
-    private static CreateProductDto MapToDto(Product p) =>
-        new(p.ProductId, p.ProductName, p.ProductDescription, p.ProductPrice, p.CategoryId);
 }

@@ -1,13 +1,13 @@
-using CSharpFunctionalExtensions;
-using Identity.Domain.Entities;
-using Identity.Domain.Enums;
-using Identity.Domain.Interfaces;
-using Identity.Domain.ValueObjects;
-using Identity.Infrastructure.DbContexts;
-using Identity.Infrastructure.Entity;
+﻿using CSharpFunctionalExtensions;
+using Store.Identity.Domain.Aggregates;
+using Store.Identity.Domain.Enums;
+using Store.Identity.Domain.Interfaces;
+using Store.Identity.Domain.ValueObjects;
+using Store.Identity.Infrastructure.DbContexts;
+using Store.Identity.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Identity.Infrastructure.Repository;
+namespace Store.Identity.Infrastructure.Repository;
 
 public class UsersRepository : IUsersRepository
 {
@@ -43,7 +43,12 @@ public class UsersRepository : IUsersRepository
             return Result.Failure<User>("Email not found");
 
         var emailVo = Email.Create(entity.Email);
-        var role = Enum.Parse<UserRole>(entity.Role);
+        if (emailVo.IsFailure)
+            return Result.Failure<User>($"Corrupted email in database: {emailVo.Error}");
+
+        if (!Enum.TryParse<UserRole>(entity.Role, out var role))
+            return Result.Failure<User>($"Unknown role in database: {entity.Role}");
+
         return Result.Success(User.Reconstitute(entity.Id, entity.Name, emailVo.Value, entity.Password, role));
     }
 
@@ -51,7 +56,7 @@ public class UsersRepository : IUsersRepository
     {
         Id = user.Id,
         Name = user.Name,
-        Email = user.Email,
+        Email = user.Email.Value,
         Password = user.Password,
         Role = user.Role.ToString()
     };

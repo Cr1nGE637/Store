@@ -10,11 +10,16 @@
       - store_network
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
       - ConnectionStrings__IdentityDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=identity
       - ConnectionStrings__CatalogDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=catalog
       - ConnectionStrings__CartDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=cart
       - ConnectionStrings__OrderingDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=ordering
+      - JwtOptions__SecretKey=${JWT_SECRET_KEY}
+      - JwtOptions__Issuer=${JWT_ISSUER}
+      - JwtOptions__Audience=${JWT_AUDIENCE}
   
   Database:
     image: postgres:latest

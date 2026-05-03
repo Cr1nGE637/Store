@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Store.Ordering.Infrastructure.Entities;
+using Store.Ordering.Infrastructure.Entity;
 
 namespace Store.Ordering.Infrastructure.DbContexts;
 

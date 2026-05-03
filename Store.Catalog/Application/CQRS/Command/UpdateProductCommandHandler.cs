@@ -39,10 +39,8 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
         foreach (var domainEvent in product.DomainEvents)
             await _publisher.Publish(domainEvent, cancellationToken);
+        product.ClearDomainEvents();
 
-        return Result.Success(MapToDto(savedResult.Value));
+        return Result.Success(CatalogMappings.ToGetProductDto(savedResult.Value));
     }
-
-    private static GetProductDto MapToDto(Product p) =>
-        new(p.ProductId, p.ProductName, p.ProductDescription, p.ProductPrice, p.CategoryId);
 }

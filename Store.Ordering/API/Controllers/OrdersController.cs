@@ -14,17 +14,17 @@ public class OrdersController(IMediator mediator) : ControllerBase
     [HttpGet("{orderId:guid}")]
     public async Task<IActionResult> GetById(Guid orderId)
     {
-        var result = await mediator.Send(new GetOrderByIdQuery(orderId));
-        return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+        if (!TryGetRequesterId(out var requesterId)) return Unauthorized();
+        var result = await mediator.Send(new GetOrderByIdQuery(orderId, requesterId, IsManager()));
+        if (result.IsFailure)
+            return result.Error == "Access denied" ? Forbid() : NotFound(result.Error);
+        return Ok(result.Value);
     }
 
     [HttpGet("my")]
     public async Task<IActionResult> GetMy()
     {
-        var customerIdClaim = User.FindFirst("userId")?.Value;
-        if (customerIdClaim == null || !Guid.TryParse(customerIdClaim, out var customerId))
-            return Unauthorized();
-
+        if (!TryGetRequesterId(out var customerId)) return Unauthorized();
         var result = await mediator.Send(new GetOrdersByCustomerQuery(customerId));
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
@@ -40,7 +40,18 @@ public class OrdersController(IMediator mediator) : ControllerBase
     [HttpPost("{orderId:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid orderId)
     {
-        var result = await mediator.Send(new CancelOrderCommand(orderId));
-        return result.IsSuccess ? Ok() : BadRequest(result.Error);
+        if (!TryGetRequesterId(out var requesterId)) return Unauthorized();
+        var result = await mediator.Send(new CancelOrderCommand(orderId, requesterId, IsManager()));
+        if (result.IsFailure)
+            return result.Error == "Access denied" ? Forbid() : BadRequest(result.Error);
+        return Ok();
     }
+
+    private bool TryGetRequesterId(out Guid requesterId)
+    {
+        var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(claim, out requesterId);
+    }
+
+    private bool IsManager() => User.IsInRole("Manager");
 }

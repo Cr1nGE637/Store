@@ -1,8 +1,8 @@
-using Identity.Infrastructure.Entity;
+﻿using Store.Identity.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Identity.Infrastructure.Configuration;
+namespace Store.Identity.Infrastructure.Configuration;
 
 public class UsersConfiguration : IEntityTypeConfiguration<UserEntity>
 {

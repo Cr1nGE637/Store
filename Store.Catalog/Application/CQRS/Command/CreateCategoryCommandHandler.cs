@@ -27,8 +27,6 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         await _categoryRepository.AddAsync(categoryResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(MapToDto(categoryResult.Value));
+        return Result.Success(CatalogMappings.ToCreateCategoryDto(categoryResult.Value));
     }
-
-    private static CreateCategoryDto MapToDto(Category c) => new(c.CategoryId, c.CategoryName);
 }

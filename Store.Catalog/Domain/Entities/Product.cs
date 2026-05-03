@@ -1,6 +1,5 @@
 using CSharpFunctionalExtensions;
 using Store.Catalog.Contracts.Events;
-using Store.Catalog.Domain.Events;
 using Store.Catalog.Domain.ValueObjects;
 using Store.SharedKernel;
 

@@ -1,15 +1,15 @@
-using Identity.Application.CQRS.Command;
-using Identity.Application.Interfaces;
-using Identity.Domain.Interfaces;
-using Identity.Infrastructure.Configuration;
-using Identity.Infrastructure.DbContexts;
-using Identity.Infrastructure.Repository;
-using Identity.Infrastructure.Services;
+﻿using Store.Identity.Application.CQRS.Command;
+using Store.Identity.Application.Interfaces;
+using Store.Identity.Domain.Interfaces;
+using Store.Identity.Infrastructure.Configuration;
+using Store.Identity.Infrastructure.DbContexts;
+using Store.Identity.Infrastructure.Repository;
+using Store.Identity.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Identity;
+namespace Store.Identity;
 
 public static class IdentityModule
 {

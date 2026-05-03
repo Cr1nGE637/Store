@@ -21,9 +21,6 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, R
         if (result.IsFailure)
             return Result.Failure<GetProductDto>(result.Error);
 
-        return Result.Success(MapToDto(result.Value));
+        return Result.Success(CatalogMappings.ToGetProductDto(result.Value));
     }
-
-    private static GetProductDto MapToDto(Product p) =>
-        new(p.ProductId, p.ProductName, p.ProductDescription, p.ProductPrice, p.CategoryId);
 }

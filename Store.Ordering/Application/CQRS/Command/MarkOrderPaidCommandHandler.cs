@@ -21,11 +21,15 @@ public class MarkOrderPaidCommandHandler(
         if (payResult.IsFailure)
             return payResult;
 
-        await orderRepository.UpdateAsync(order);
+        var updateResult = await orderRepository.UpdateAsync(order);
+        if (updateResult.IsFailure)
+            return updateResult;
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         foreach (var domainEvent in order.DomainEvents)
             await publisher.Publish(domainEvent, cancellationToken);
+        order.ClearDomainEvents();
 
         return Result.Success();
     }

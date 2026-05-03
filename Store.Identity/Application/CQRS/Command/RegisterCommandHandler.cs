@@ -1,12 +1,12 @@
-using CSharpFunctionalExtensions;
-using Identity.Application.DTOs;
-using Identity.Application.Interfaces;
-using Identity.Domain.Entities;
-using Identity.Domain.Interfaces;
-using Identity.Domain.ValueObjects;
+﻿using CSharpFunctionalExtensions;
+using Store.Identity.Application.DTOs;
+using Store.Identity.Application.Interfaces;
+using Store.Identity.Domain.Aggregates;
+using Store.Identity.Domain.Interfaces;
+using Store.Identity.Domain.ValueObjects;
 using MediatR;
 
-namespace Identity.Application.CQRS.Command;
+namespace Store.Identity.Application.CQRS.Command;
 
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<RegisterDto>>
 {
@@ -23,13 +23,16 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
 
     public async Task<Result<RegisterDto>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        var exists = await _usersRepository.ExistsByEmailAsync(request.Email);
-        if (exists)
-            return Result.Failure<RegisterDto>("Email already exists");
+        if (request.Password.Length < 8)
+            return Result.Failure<RegisterDto>("Password must be at least 8 characters");
 
         var emailResult = Email.Create(request.Email);
         if (emailResult.IsFailure)
             return Result.Failure<RegisterDto>(emailResult.Error);
+
+        var exists = await _usersRepository.ExistsByEmailAsync(emailResult.Value.Value);
+        if (exists)
+            return Result.Failure<RegisterDto>("Email already exists");
 
         var hashedPassword = _passwordHasher.Generate(request.Password);
 
@@ -37,12 +40,12 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
         if (userResult.IsFailure)
             return Result.Failure<RegisterDto>(userResult.Error);
 
-        await _usersRepository.AddAsync(userResult.Value);
+        var addResult = await _usersRepository.AddAsync(userResult.Value);
+        if (addResult.IsFailure)
+            return Result.Failure<RegisterDto>(addResult.Error);
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(MapToDto(userResult.Value));
+        return Result.Success(IdentityMappings.ToRegisterDto(userResult.Value));
     }
-
-    private static RegisterDto MapToDto(User user) =>
-        new(user.Id, user.Name, user.Email, user.Role.ToString());
 }

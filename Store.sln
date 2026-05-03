@@ -13,13 +13,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Catalog", "Store.Cata
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.SharedKernel", "Store.SharedKernel\Store.SharedKernel.csproj", "{087A38E0-F2B7-4726-BAB1-D7DE7ED99458}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Carts", "Store.Cart\Store.Carts.csproj", "{15D6E56D-0D1E-4316-9F93-875486FCDD3A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Carts", "Store.Carts\Store.Carts.csproj", "{15D6E56D-0D1E-4316-9F93-875486FCDD3A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Catalog.Contracts", "Store.Catalog.Contracts\Store.Catalog.Contracts.csproj", "{7522B577-53BA-42C3-B1CE-8873A71E7A9C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Carts.Contracts", "Store.Carts.Contracts\Store.Carts.Contracts.csproj", "{6379B591-E84E-4D30-9AA9-421380363931}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Ordering", "Store.Ordering\Store.Ordering.csproj", "{3D7E4B52-6A1F-4C8D-9E0B-2F5A7C9D1E3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Ordering.Contracts", "Store.Ordering.Contracts\Store.Ordering.Contracts.csproj", "{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -127,6 +129,18 @@ Global
 		{3D7E4B52-6A1F-4C8D-9E0B-2F5A7C9D1E3F}.Release|x64.Build.0 = Release|Any CPU
 		{3D7E4B52-6A1F-4C8D-9E0B-2F5A7C9D1E3F}.Release|x86.ActiveCfg = Release|Any CPU
 		{3D7E4B52-6A1F-4C8D-9E0B-2F5A7C9D1E3F}.Release|x86.Build.0 = Release|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Debug|x64.Build.0 = Debug|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Debug|x86.Build.0 = Debug|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Release|x64.ActiveCfg = Release|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Release|x64.Build.0 = Release|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB7A0AAF-8AD4-4127-B492-E036E23DDA37}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

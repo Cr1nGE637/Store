@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Users.Infrastructure.Migrations
+namespace Store.Identity.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class UniqueEmailIndex : Migration

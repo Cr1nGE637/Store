@@ -1,8 +1,8 @@
-using CSharpFunctionalExtensions;
-using Identity.Application.DTOs;
+﻿using CSharpFunctionalExtensions;
+using Store.Identity.Application.DTOs;
 using MediatR;
 
-namespace Identity.Application.CQRS.Query;
+namespace Store.Identity.Application.CQRS.Query;
 
 public class GetUserQuery : IRequest<Result<GetUserDto>>
 {

@@ -1,5 +1,5 @@
-using System.Text;
-using Identity.Infrastructure.Configuration;
+﻿using System.Text;
+using Store.Identity.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -17,12 +17,14 @@ public static class ApiExtensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions!.Issuer,
+                    ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtOptions!.SecretKey)),
+                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
                 };
                 options.Events = new JwtBearerEvents
                 {

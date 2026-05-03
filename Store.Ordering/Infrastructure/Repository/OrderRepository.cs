@@ -4,7 +4,7 @@ using Store.Ordering.Domain.Aggregates;
 using Store.Ordering.Domain.ValueObjects;
 using Store.Ordering.Domain.Interfaces;
 using Store.Ordering.Infrastructure.DbContexts;
-using Store.Ordering.Infrastructure.Entities;
+using Store.Ordering.Infrastructure.Entity;
 
 namespace Store.Ordering.Infrastructure.Repository;
 
@@ -13,6 +13,7 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
     public async Task<Result<Order>> GetByIdAsync(Guid orderId)
     {
         var entity = await context.Orders
+            .AsNoTracking()
             .Include(o => o.Products)
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
@@ -25,6 +26,7 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
     public async Task<IReadOnlyList<Order>> GetByCustomerIdAsync(Guid customerId)
     {
         var entities = await context.Orders
+            .AsNoTracking()
             .Include(o => o.Products)
             .Where(o => o.CustomerId == customerId)
             .ToListAsync();
@@ -32,20 +34,22 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
         return entities.Select(MapToDomain).ToList();
     }
 
-    public async Task AddAsync(Order order)
+    public async Task<Result> AddAsync(Order order)
     {
         await context.Orders.AddAsync(MapToEntity(order));
+        return Result.Success();
     }
 
-    public async Task UpdateAsync(Order order)
+    public async Task<Result> UpdateAsync(Order order)
     {
         var entity = await context.Orders.FindAsync(order.OrderId);
-        if (entity != null)
-        {
-            entity.Status = order.Status;
-            entity.PaidAt = order.PaidAt;
-            entity.CancelledAt = order.CancelledAt;
-        }
+        if (entity == null)
+            return Result.Failure($"Order {order.OrderId} not found for update");
+
+        entity.Status = order.Status;
+        entity.PaidAt = order.PaidAt;
+        entity.CancelledAt = order.CancelledAt;
+        return Result.Success();
     }
 
     private static Order MapToDomain(OrderEntity entity)
@@ -54,7 +58,13 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
             entity.OrderId, entity.CustomerId, entity.Status,
             entity.CreatedAt, entity.PaidAt, entity.CancelledAt);
         var products = entity.Products.Select(p =>
-            OrderedProduct.Create(p.ProductId, p.ProductName, p.Price, p.Quantity).Value);
+        {
+            var result = OrderedProduct.Create(p.ProductId, p.ProductName, p.Price, p.Quantity);
+            if (result.IsFailure)
+                throw new InvalidOperationException(
+                    $"Corrupted OrderedProduct in DB (OrderId={entity.OrderId}): {result.Error}");
+            return result.Value;
+        });
         order.LoadProducts(products);
         return order;
     }

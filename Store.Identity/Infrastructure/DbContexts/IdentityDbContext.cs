@@ -1,7 +1,7 @@
-using Identity.Infrastructure.Entity;
+﻿using Store.Identity.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Identity.Infrastructure.DbContexts;
+namespace Store.Identity.Infrastructure.DbContexts;
 
 public class IdentityDbContext(DbContextOptions<IdentityDbContext> options) :  DbContext(options)
 {

@@ -14,15 +14,10 @@ public class GetOrderByIdQueryHandler(IOrderRepository orderRepository)
         if (result.IsFailure)
             return Result.Failure<GetOrderDto>(result.Error);
 
-        return Result.Success(MapToDto(result.Value));
-    }
+        var order = result.Value;
+        if (!request.IsManager && order.CustomerId != request.RequesterId)
+            return Result.Failure<GetOrderDto>("Access denied");
 
-    private static GetOrderDto MapToDto(Domain.Aggregates.Order order) => new(
-        order.OrderId,
-        order.CustomerId,
-        order.Status.ToString(),
-        order.CreatedAt,
-        order.PaidAt,
-        order.CancelledAt,
-        order.Products.Select(p => new OrderedProductDto(p.ProductId, p.ProductName, p.Price, p.Quantity)).ToList());
+        return Result.Success(OrderingMappings.ToGetOrderDto(order));
+    }
 }

@@ -8,9 +8,13 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Store.App/Store.App.csproj", "Store.App/"]
-COPY ["Store.Infrastructure/Store.Infrastructure.csproj", "Store.Infrastructure/"]
-COPY ["Store.Domain/Store.Domain.csproj", "Store.Domain/"]
-COPY ["Store.Application/Store.Application.csproj", "Store.Application/"]
+COPY ["Store.SharedKernel/Store.SharedKernel.csproj", "Store.SharedKernel/"]
+COPY ["Store.Identity/Store.Identity.csproj", "Store.Identity/"]
+COPY ["Store.Catalog/Store.Catalog.csproj", "Store.Catalog/"]
+COPY ["Store.Catalog.Contracts/Store.Catalog.Contracts.csproj", "Store.Catalog.Contracts/"]
+COPY ["Store.Carts/Store.Carts.csproj", "Store.Carts/"]
+COPY ["Store.Carts.Contracts/Store.Carts.Contracts.csproj", "Store.Carts.Contracts/"]
+COPY ["Store.Ordering/Store.Ordering.csproj", "Store.Ordering/"]
 RUN dotnet restore "Store.App/Store.App.csproj"
 COPY . .
 WORKDIR "/src/Store.App"

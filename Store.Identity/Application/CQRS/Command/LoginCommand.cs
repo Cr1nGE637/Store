@@ -1,8 +1,8 @@
-using CSharpFunctionalExtensions;
-using Identity.Application.DTOs;
+﻿using CSharpFunctionalExtensions;
+using Store.Identity.Application.DTOs;
 using MediatR;
 
-namespace Identity.Application.CQRS.Command;
+namespace Store.Identity.Application.CQRS.Command;
 
 public class LoginCommand :  IRequest<Result<LoginDto>>
 {

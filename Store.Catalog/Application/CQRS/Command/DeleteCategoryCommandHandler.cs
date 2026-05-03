@@ -39,8 +39,6 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(MapToDto(existingResult.Value));
+        return Result.Success(CatalogMappings.ToGetCategoryDto(existingResult.Value));
     }
-
-    private static GetCategoryDto MapToDto(Category c) => new(c.CategoryId, c.CategoryName);
 }

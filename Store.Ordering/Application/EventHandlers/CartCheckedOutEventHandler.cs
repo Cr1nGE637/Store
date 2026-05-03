@@ -44,10 +44,15 @@ public class CartCheckedOutEventHandler(
         }
 
         var order = orderResult.Value;
-        await orderRepository.AddAsync(order);
+        var addResult = await orderRepository.AddAsync(order);
+        if (addResult.IsFailure)
+            throw new InvalidOperationException(
+                $"Failed to persist order from cart {notification.CartId}: {addResult.Error}");
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         foreach (var domainEvent in order.DomainEvents)
             await publisher.Publish(domainEvent, cancellationToken);
+        order.ClearDomainEvents();
     }
 }

@@ -11,16 +11,7 @@ public class GetOrdersByCustomerQueryHandler(IOrderRepository orderRepository)
     public async Task<Result<IReadOnlyList<GetOrderDto>>> Handle(GetOrdersByCustomerQuery request, CancellationToken cancellationToken)
     {
         var orders = await orderRepository.GetByCustomerIdAsync(request.CustomerId);
-        var dtos = orders.Select(MapToDto).ToList();
+        var dtos = orders.Select(OrderingMappings.ToGetOrderDto).ToList();
         return Result.Success<IReadOnlyList<GetOrderDto>>(dtos);
     }
-
-    private static GetOrderDto MapToDto(Domain.Aggregates.Order order) => new(
-        order.OrderId,
-        order.CustomerId,
-        order.Status.ToString(),
-        order.CreatedAt,
-        order.PaidAt,
-        order.CancelledAt,
-        order.Products.Select(p => new OrderedProductDto(p.ProductId, p.ProductName, p.Price, p.Quantity)).ToList());
 }

@@ -35,6 +35,9 @@ TestResults/
 appsettings.Local.json
 secrets.json
 
+# Docker secrets — copy .env.example → .env and fill in values
+.env
+
 # Docker
 .docker/
 

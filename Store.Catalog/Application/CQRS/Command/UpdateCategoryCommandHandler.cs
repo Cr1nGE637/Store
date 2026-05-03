@@ -35,8 +35,6 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(MapToDto(savedResult.Value));
+        return Result.Success(CatalogMappings.ToGetCategoryDto(savedResult.Value));
     }
-
-    private static GetCategoryDto MapToDto(Category c) => new(c.CategoryId, c.CategoryName);
 }

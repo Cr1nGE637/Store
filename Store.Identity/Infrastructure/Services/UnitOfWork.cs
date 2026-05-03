@@ -1,7 +1,7 @@
-using Identity.Application.Interfaces;
-using Identity.Infrastructure.DbContexts;
+﻿using Store.Identity.Application.Interfaces;
+using Store.Identity.Infrastructure.DbContexts;
 
-namespace Identity.Infrastructure.Services;
+namespace Store.Identity.Infrastructure.Services;
 
 public class UnitOfWork : IIdentityUnitOfWork
 {

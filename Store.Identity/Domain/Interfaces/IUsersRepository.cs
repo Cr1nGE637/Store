@@ -1,7 +1,7 @@
-using CSharpFunctionalExtensions;
-using Identity.Domain.Entities;
+﻿using CSharpFunctionalExtensions;
+using Store.Identity.Domain.Aggregates;
 
-namespace Identity.Domain.Interfaces;
+namespace Store.Identity.Domain.Interfaces;
 
 public interface IUsersRepository
 {

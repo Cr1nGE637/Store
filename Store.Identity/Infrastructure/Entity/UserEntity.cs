@@ -1,4 +1,4 @@
-namespace Identity.Infrastructure.Entity;
+﻿namespace Store.Identity.Infrastructure.Entity;
 
 public class UserEntity
 {

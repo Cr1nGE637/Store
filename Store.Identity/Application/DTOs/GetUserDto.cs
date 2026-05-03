@@ -1,3 +1,3 @@
-namespace Identity.Application.DTOs;
+﻿namespace Store.Identity.Application.DTOs;
 
 public record GetUserDto(string Email, string Name, string Role);
