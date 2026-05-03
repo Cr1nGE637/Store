@@ -42,6 +42,11 @@ public class UsersRepository : IUsersRepository
         if (entity == null)
             return Result.Failure<User>("Email not found");
 
+        return ToDomain(entity);
+    }
+
+    private static Result<User> ToDomain(UserEntity entity)
+    {
         var emailVo = Email.Create(entity.Email);
         if (emailVo.IsFailure)
             return Result.Failure<User>($"Corrupted email in database: {emailVo.Error}");

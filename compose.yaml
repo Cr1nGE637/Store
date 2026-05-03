@@ -5,7 +5,8 @@
       context: .
       dockerfile: Store.App/Dockerfile
     depends_on:
-      - Database
+      Database:
+        condition: service_healthy
     networks:
       - store_network
     ports:
@@ -17,6 +18,7 @@
       - ConnectionStrings__CatalogDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=catalog
       - ConnectionStrings__CartDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=cart
       - ConnectionStrings__OrderingDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=ordering
+      - ConnectionStrings__InventoryDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=inventory
       - JwtOptions__SecretKey=${JWT_SECRET_KEY}
       - JwtOptions__Issuer=${JWT_ISSUER}
       - JwtOptions__Audience=${JWT_AUDIENCE}
@@ -33,6 +35,11 @@
       - store_network
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d Store"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   store_network:

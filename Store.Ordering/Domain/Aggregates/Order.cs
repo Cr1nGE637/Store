@@ -61,7 +61,7 @@ public class Order : AggregateRoot
 
         Status = OrderStatus.Paid;
         PaidAt = DateTime.UtcNow;
-        RaiseDomainEvent(new OrderPaidEvent(OrderId, CustomerId));
+        RaiseDomainEvent(new OrderPaidEvent(OrderId, CustomerId, MapToItems()));
         return Result.Success();
     }
 

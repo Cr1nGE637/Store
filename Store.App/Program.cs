@@ -9,6 +9,8 @@ using Store.Carts;
 using Store.Carts.Infrastructure.DbContexts;
 using Store.Ordering;
 using Store.Ordering.Infrastructure.DbContexts;
+using Store.Inventory;
+using Store.Inventory.Infrastructure.DbContexts;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,7 @@ builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddCatalogModule(builder.Configuration);
 builder.Services.AddCartModule(builder.Configuration);
 builder.Services.AddOrderingModule(builder.Configuration);
+builder.Services.AddInventoryModule(builder.Configuration);
 
 var app = builder.Build();
 
@@ -51,6 +54,7 @@ using (var scope = app.Services.CreateScope())
     await services.ApplyMigrationsAsync<CatalogDbContext>();
     await services.ApplyMigrationsAsync<CartDbContext>();
     await services.ApplyMigrationsAsync<OrderingDbContext>();
+    await services.ApplyMigrationsAsync<InventoryDbContext>();
 }
 
 app.Run();
