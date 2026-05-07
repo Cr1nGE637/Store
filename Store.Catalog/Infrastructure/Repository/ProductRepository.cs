@@ -18,14 +18,29 @@ public class ProductRepository : IProductRepository
 
     public async Task<Result<List<Product>>> GetAllAsync()
     {
-        var entities = await _dbContext.Products.AsNoTracking().ToListAsync();
+        var entities = await _dbContext.Products
+            .AsNoTracking()
+            .OrderBy(p => p.ProductName)
+            .ToListAsync();
+        return Result.Success(entities.Select(ToDomain).ToList());
+    }
+
+    public async Task<Result<List<Product>>> GetPageAsync(int skip, int take)
+    {
+        var entities = await _dbContext.Products
+            .AsNoTracking()
+            .OrderBy(p => p.ProductName)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
         return Result.Success(entities.Select(ToDomain).ToList());
     }
 
     public async Task<Result<Product>> GetByNameAsync(string name)
     {
+        var normalizedName = name.Trim();
         var entity = await _dbContext.Products.AsNoTracking()
-            .FirstOrDefaultAsync(p => p.ProductName == name);
+            .FirstOrDefaultAsync(p => EF.Functions.ILike(p.ProductName, normalizedName));
         if (entity == null)
             return Result.Failure<Product>("Product not found");
 
@@ -57,18 +72,17 @@ public class ProductRepository : IProductRepository
         return Result.Success();
     }
 
-    public async Task<Result<Product>> UpdateAsync(Product product)
+    public async Task<Result> UpdateAsync(Product product)
     {
         var entity = await _dbContext.Products.FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
         if (entity == null)
-            return Result.Failure<Product>("Product not found");
+            return Result.Failure("Product not found");
 
         entity.ProductName = product.ProductName;
         entity.ProductDescription = product.ProductDescription;
         entity.ProductPrice = product.ProductPrice;
         entity.CategoryId = product.CategoryId;
-
-        return Result.Success(ToDomain(entity));
+        return Result.Success();
     }
 
     public async Task<bool> HasProductsByCategoryAsync(Guid categoryId)
@@ -80,6 +94,18 @@ public class ProductRepository : IProductRepository
     {
         var entities = await _dbContext.Products.AsNoTracking()
             .Where(p => p.CategoryId == categoryId)
+            .OrderBy(p => p.ProductName)
+            .ToListAsync();
+        return Result.Success(entities.Select(ToDomain).ToList());
+    }
+
+    public async Task<Result<List<Product>>> GetByCategoryIdAsync(Guid categoryId, int skip, int take)
+    {
+        var entities = await _dbContext.Products.AsNoTracking()
+            .Where(p => p.CategoryId == categoryId)
+            .OrderBy(p => p.ProductName)
+            .Skip(skip)
+            .Take(take)
             .ToListAsync();
         return Result.Success(entities.Select(ToDomain).ToList());
     }

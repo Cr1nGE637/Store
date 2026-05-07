@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Store.EventOutbox.Infrastructure.Extensions;
 using Store.Inventory.Infrastructure.Entity;
 
 namespace Store.Inventory.Infrastructure.DbContexts;
@@ -9,6 +10,8 @@ public class InventoryDbContext(DbContextOptions<InventoryDbContext> options) : 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("inventory");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(InventoryDbContext).Assembly);
+        modelBuilder.ConfigureDomainEventOutbox();
     }
 }

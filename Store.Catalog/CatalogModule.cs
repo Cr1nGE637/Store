@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Store.EventOutbox.Infrastructure.Services;
 using Store.Catalog.Application.CQRS.Command;
 using Store.Catalog.Domain.Interfaces;
 using Store.Catalog.Infrastructure.Repository;
@@ -17,7 +18,11 @@ public static class CatalogModule
         services.AddDbContext<CatalogDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("CatalogDbConnectionString"),
-                npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "catalog")));
+                npgsql =>
+                {
+                    npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "catalog");
+                    npgsql.EnableRetryOnFailure();
+                }));
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
@@ -25,6 +30,8 @@ public static class CatalogModule
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICatalogUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICatalogDomainEventOutbox, CatalogDomainEventOutbox>();
+        services.AddHostedService<DomainEventOutboxProcessor<CatalogDbContext>>();
 
         return services;
     }

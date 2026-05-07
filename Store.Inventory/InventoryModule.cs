@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Store.EventOutbox.Infrastructure.Services;
 using Store.Inventory.Application.EventHandlers;
 using Store.Inventory.Application.Interfaces;
 using Store.Inventory.Domain.Interfaces;
@@ -17,13 +18,19 @@ public static class InventoryModule
         services.AddDbContext<InventoryDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("InventoryDbConnectionString"),
-                npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "inventory")));
+                npgsql =>
+                {
+                    npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "inventory");
+                    npgsql.EnableRetryOnFailure();
+                }));
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(OrderCreatedEventHandler).Assembly));
 
         services.AddScoped<IStockItemRepository, StockItemRepository>();
         services.AddScoped<IInventoryUnitOfWork, UnitOfWork>();
+        services.AddScoped<IInventoryDomainEventOutbox, InventoryDomainEventOutbox>();
+        services.AddHostedService<DomainEventOutboxProcessor<InventoryDbContext>>();
 
         return services;
     }

@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
 namespace Store.Identity.API.Controllers;
@@ -34,22 +35,37 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("login")]
     public async Task<ActionResult<LoginDto>> Login([FromBody] LoginCommand command, CancellationToken token)
     {
         var result = await _mediator.Send(command, token);
         if (result.IsSuccess)
         {
-            Response.Cookies.Append("tasty-cookies", result.Value.Token, new CookieOptions
+            Response.Cookies.Append(AuthCookieDefaults.Name, result.Value.Token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddHours(_jwtOptions.ExpiresHours)
             });
         }
         if (result.IsFailure)
-            return BadRequest(result.Error);
+            return Unauthorized(result.Error);
         return Ok(result.Value);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete(AuthCookieDefaults.Name, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Strict
+        });
+
+        return NoContent();
     }
     
     [Authorize(Roles = "Manager")]

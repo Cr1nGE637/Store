@@ -6,6 +6,7 @@ public class OrderEntity
 {
     public Guid OrderId { get; set; }
     public Guid CustomerId { get; set; }
+    public string CustomerEmail { get; set; } = string.Empty;
     public OrderStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? PaidAt { get; set; }

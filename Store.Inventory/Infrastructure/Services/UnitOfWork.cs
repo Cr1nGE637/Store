@@ -5,6 +5,6 @@ namespace Store.Inventory.Infrastructure.Services;
 
 public class UnitOfWork(InventoryDbContext context) : IInventoryUnitOfWork
 {
-    public async Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         await context.SaveChangesAsync(cancellationToken);
 }

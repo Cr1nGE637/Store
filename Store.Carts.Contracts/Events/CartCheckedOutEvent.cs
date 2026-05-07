@@ -11,4 +11,5 @@ public record CartCheckedOutItem(
 public record CartCheckedOutEvent(
     Guid CartId,
     Guid CustomerId,
+    string CustomerEmail,
     IReadOnlyList<CartCheckedOutItem> Items) : IDomainEvent;

@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Store.Catalog.Application.DTOs;
 using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
@@ -11,13 +12,16 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 {
     private readonly IProductRepository _productRepository;
     private readonly ICatalogUnitOfWork _unitOfWork;
-    private readonly IPublisher _publisher;
+    private readonly ICatalogDomainEventOutbox _outbox;
 
-    public CreateProductCommandHandler(IProductRepository productRepository, ICatalogUnitOfWork unitOfWork, IPublisher publisher)
+    public CreateProductCommandHandler(
+        IProductRepository productRepository,
+        ICatalogUnitOfWork unitOfWork,
+        ICatalogDomainEventOutbox outbox)
     {
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
-        _publisher = publisher;
+        _outbox = outbox;
     }
 
     public async Task<Result<CreateProductDto>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -32,10 +36,16 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
         var product = productResult.Value;
         await _productRepository.AddAsync(product);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _outbox.AddAsync(product.DomainEvents, cancellationToken);
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (CatalogPersistenceErrors.IsUniqueViolation(ex))
+        {
+            return Result.Failure<CreateProductDto>("Product already exists");
+        }
 
-        foreach (var domainEvent in product.DomainEvents)
-            await _publisher.Publish(domainEvent, cancellationToken);
         product.ClearDomainEvents();
 
         return Result.Success(CatalogMappings.ToCreateProductDto(product));

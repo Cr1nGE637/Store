@@ -5,6 +5,7 @@ using Store.Ordering.Domain.ValueObjects;
 using Store.Ordering.Domain.Interfaces;
 using Store.Ordering.Infrastructure.DbContexts;
 using Store.Ordering.Infrastructure.Entity;
+using System.Security.Cryptography;
 
 namespace Store.Ordering.Infrastructure.Repository;
 
@@ -29,6 +30,21 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
             .AsNoTracking()
             .Include(o => o.Products)
             .Where(o => o.CustomerId == customerId)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        return entities.Select(MapToDomain).ToList();
+    }
+
+    public async Task<IReadOnlyList<Order>> GetByCustomerIdAsync(Guid customerId, int skip, int take)
+    {
+        var entities = await context.Orders
+            .AsNoTracking()
+            .Include(o => o.Products)
+            .Where(o => o.CustomerId == customerId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Skip(skip)
+            .Take(take)
             .ToListAsync();
 
         return entities.Select(MapToDomain).ToList();
@@ -55,7 +71,7 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
     private static Order MapToDomain(OrderEntity entity)
     {
         var order = Order.Reconstitute(
-            entity.OrderId, entity.CustomerId, entity.Status,
+            entity.OrderId, entity.CustomerId, entity.CustomerEmail, entity.Status,
             entity.CreatedAt, entity.PaidAt, entity.CancelledAt);
         var products = entity.Products.Select(p =>
         {
@@ -73,13 +89,14 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
     {
         OrderId = order.OrderId,
         CustomerId = order.CustomerId,
+        CustomerEmail = order.CustomerEmail,
         Status = order.Status,
         CreatedAt = order.CreatedAt,
         PaidAt = order.PaidAt,
         CancelledAt = order.CancelledAt,
         Products = order.Products.Select(p => new OrderedProductEntity
         {
-            OrderedProductId = Guid.NewGuid(),
+            OrderedProductId = CreateOrderedProductId(order.OrderId, p.ProductId),
             OrderId = order.OrderId,
             ProductId = p.ProductId,
             ProductName = p.ProductName,
@@ -87,4 +104,15 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
             Quantity = p.Quantity
         }).ToList()
     };
+
+    private static Guid CreateOrderedProductId(Guid orderId, Guid productId)
+    {
+        Span<byte> source = stackalloc byte[32];
+        orderId.TryWriteBytes(source[..16]);
+        productId.TryWriteBytes(source[16..]);
+
+        Span<byte> hash = stackalloc byte[16];
+        MD5.HashData(source, hash);
+        return new Guid(hash);
+    }
 }

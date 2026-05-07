@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Store.Catalog.Application.DTOs;
 using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
@@ -20,12 +21,23 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
 
     public async Task<Result<CreateCategoryDto>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
+        var existing = await _categoryRepository.GetByNameAsync(request.CategoryName);
+        if (existing.IsSuccess)
+            return Result.Failure<CreateCategoryDto>("Category already exists");
+
         var categoryResult = Category.Create(request.CategoryName);
         if (categoryResult.IsFailure)
             return Result.Failure<CreateCategoryDto>(categoryResult.Error);
 
         await _categoryRepository.AddAsync(categoryResult.Value);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (CatalogPersistenceErrors.IsUniqueViolation(ex))
+        {
+            return Result.Failure<CreateCategoryDto>("Category already exists");
+        }
 
         return Result.Success(CatalogMappings.ToCreateCategoryDto(categoryResult.Value));
     }

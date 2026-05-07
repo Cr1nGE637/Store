@@ -8,7 +8,7 @@ namespace Store.Ordering.Application.CQRS.Command;
 public class CancelOrderCommandHandler(
     IOrderRepository orderRepository,
     IOrderingUnitOfWork unitOfWork,
-    IPublisher publisher) : IRequestHandler<CancelOrderCommand, Result>
+    IOrderingDomainEventOutbox outbox) : IRequestHandler<CancelOrderCommand, Result>
 {
     public async Task<Result> Handle(CancelOrderCommand request, CancellationToken cancellationToken)
     {
@@ -17,21 +17,21 @@ public class CancelOrderCommandHandler(
             return Result.Failure(orderResult.Error);
 
         var order = orderResult.Value;
-        if (!request.IsManager && order.CustomerId != request.RequesterId)
+        if (order.CustomerId != request.RequesterId)
             return Result.Failure("Access denied");
 
         var cancelResult = order.Cancel();
         if (cancelResult.IsFailure)
             return cancelResult;
+        if (!cancelResult.Value)
+            return Result.Success();
 
         var updateResult = await orderRepository.UpdateAsync(order);
         if (updateResult.IsFailure)
             return updateResult;
 
+        await outbox.AddAsync(order.DomainEvents, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        foreach (var domainEvent in order.DomainEvents)
-            await publisher.Publish(domainEvent, cancellationToken);
         order.ClearDomainEvents();
 
         return Result.Success();

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Store.EventOutbox.Infrastructure.Extensions;
 using Store.Ordering.Infrastructure.Entity;
 
 namespace Store.Ordering.Infrastructure.DbContexts;
@@ -12,5 +13,6 @@ public class OrderingDbContext(DbContextOptions<OrderingDbContext> options) : Db
     {
         modelBuilder.HasDefaultSchema("ordering");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderingDbContext).Assembly);
+        modelBuilder.ConfigureDomainEventOutbox();
     }
 }

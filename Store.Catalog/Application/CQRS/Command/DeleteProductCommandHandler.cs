@@ -11,13 +11,16 @@ public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand,
 {
     private readonly IProductRepository _productRepository;
     private readonly ICatalogUnitOfWork _unitOfWork;
-    private readonly IPublisher _publisher;
+    private readonly ICatalogDomainEventOutbox _outbox;
 
-    public DeleteProductCommandHandler(IProductRepository productRepository, ICatalogUnitOfWork unitOfWork, IPublisher publisher)
+    public DeleteProductCommandHandler(
+        IProductRepository productRepository,
+        ICatalogUnitOfWork unitOfWork,
+        ICatalogDomainEventOutbox outbox)
     {
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
-        _publisher = publisher;
+        _outbox = outbox;
     }
 
     public async Task<Result<GetProductDto>> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
@@ -33,10 +36,8 @@ public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand,
         if (deleteResult.IsFailure)
             return Result.Failure<GetProductDto>(deleteResult.Error);
 
+        await _outbox.AddAsync(product.DomainEvents, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        foreach (var domainEvent in product.DomainEvents)
-            await _publisher.Publish(domainEvent, cancellationToken);
         product.ClearDomainEvents();
 
         return Result.Success(CatalogMappings.ToGetProductDto(product));

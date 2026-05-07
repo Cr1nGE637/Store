@@ -11,7 +11,7 @@ namespace Store.Ordering.Application.EventHandlers;
 public class CartCheckedOutEventHandler(
     IOrderRepository orderRepository,
     IOrderingUnitOfWork unitOfWork,
-    IPublisher publisher,
+    IOrderingDomainEventOutbox outbox,
     ILogger<CartCheckedOutEventHandler> logger) : INotificationHandler<CartCheckedOutEvent>
 {
     public async Task Handle(CartCheckedOutEvent notification, CancellationToken cancellationToken)
@@ -32,6 +32,7 @@ public class CartCheckedOutEventHandler(
 
         var orderResult = Order.Create(
             notification.CustomerId,
+            notification.CustomerEmail,
             productResults.Select(r => r.Value).ToList());
 
         if (orderResult.IsFailure)
@@ -49,10 +50,8 @@ public class CartCheckedOutEventHandler(
             throw new InvalidOperationException(
                 $"Failed to persist order from cart {notification.CartId}: {addResult.Error}");
 
+        await outbox.AddAsync(order.DomainEvents, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        foreach (var domainEvent in order.DomainEvents)
-            await publisher.Publish(domainEvent, cancellationToken);
         order.ClearDomainEvents();
     }
 }

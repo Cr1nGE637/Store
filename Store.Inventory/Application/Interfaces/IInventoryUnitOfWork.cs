@@ -2,5 +2,5 @@ namespace Store.Inventory.Application.Interfaces;
 
 public interface IInventoryUnitOfWork
 {
-    Task SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

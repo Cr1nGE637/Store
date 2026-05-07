@@ -1,10 +1,12 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Store.Identity.Application.DTOs;
 using Store.Identity.Application.Interfaces;
 using Store.Identity.Domain.Aggregates;
 using Store.Identity.Domain.Interfaces;
 using Store.Identity.Domain.ValueObjects;
-using MediatR;
 
 namespace Store.Identity.Application.CQRS.Command;
 
@@ -13,12 +15,18 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IIdentityUnitOfWork _unitOfWork;
+    private readonly IIdentityDomainEventOutbox _outbox;
 
-    public RegisterCommandHandler(IPasswordHasher passwordHasher, IUsersRepository usersRepository, IIdentityUnitOfWork unitOfWork)
+    public RegisterCommandHandler(
+        IPasswordHasher passwordHasher,
+        IUsersRepository usersRepository,
+        IIdentityUnitOfWork unitOfWork,
+        IIdentityDomainEventOutbox outbox)
     {
         _passwordHasher = passwordHasher;
         _usersRepository = usersRepository;
         _unitOfWork = unitOfWork;
+        _outbox = outbox;
     }
 
     public async Task<Result<RegisterDto>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -44,8 +52,23 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
         if (addResult.IsFailure)
             return Result.Failure<RegisterDto>(addResult.Error);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _outbox.AddAsync(userResult.Value.DomainEvents, cancellationToken);
+
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            userResult.Value.ClearDomainEvents();
+        }
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+        {
+            return Result.Failure<RegisterDto>("Email already exists");
+        }
 
         return Result.Success(IdentityMappings.ToRegisterDto(userResult.Value));
+    }
+
+    private static bool IsUniqueViolation(DbUpdateException exception)
+    {
+        return exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
     }
 }

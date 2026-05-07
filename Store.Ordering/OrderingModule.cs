@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Store.EventOutbox.Infrastructure.Services;
 using Store.Ordering.Application.EventHandlers;
 using Store.Ordering.Application.Interfaces;
 using Store.Ordering.Domain.Interfaces;
@@ -17,13 +18,19 @@ public static class OrderingModule
         services.AddDbContext<OrderingDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("OrderingDbConnectionString"),
-                npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "ordering")));
+                npgsql =>
+                {
+                    npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "ordering");
+                    npgsql.EnableRetryOnFailure();
+                }));
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(CartCheckedOutEventHandler).Assembly));
 
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderingUnitOfWork, UnitOfWork>();
+        services.AddScoped<IOrderingDomainEventOutbox, OrderingDomainEventOutbox>();
+        services.AddHostedService<DomainEventOutboxProcessor<OrderingDbContext>>();
 
         return services;
     }

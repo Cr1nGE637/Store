@@ -19,7 +19,7 @@ public class Category : AggregateRoot
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<Category>("Category name is required");
 
-        return Result.Success(new Category(Guid.NewGuid(), name));
+        return Result.Success(new Category(Guid.NewGuid(), name.Trim()));
     }
 
     internal static Category Reconstitute(Guid id, string name) => new(id, name);
@@ -29,7 +29,7 @@ public class Category : AggregateRoot
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure("Category name is required");
 
-        CategoryName = name;
+        CategoryName = name.Trim();
         return Result.Success();
     }
 }

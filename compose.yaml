@@ -1,6 +1,7 @@
 ﻿services:
   store.app:
     image: store.app
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Store.App/Dockerfile
@@ -14,27 +15,33 @@
     env_file:
       - .env
     environment:
-      - ConnectionStrings__IdentityDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=identity
-      - ConnectionStrings__CatalogDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=catalog
-      - ConnectionStrings__CartDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=cart
-      - ConnectionStrings__OrderingDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=ordering
-      - ConnectionStrings__InventoryDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=***;SearchPath=inventory
+      - ConnectionStrings__IdentityDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=${POSTGRES_PASSWORD};SearchPath=identity
+      - ConnectionStrings__CatalogDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=${POSTGRES_PASSWORD};SearchPath=catalog
+      - ConnectionStrings__CartDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=${POSTGRES_PASSWORD};SearchPath=cart
+      - ConnectionStrings__OrderingDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=${POSTGRES_PASSWORD};SearchPath=ordering
+      - ConnectionStrings__InventoryDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=${POSTGRES_PASSWORD};SearchPath=inventory
+      - ConnectionStrings__NotificationsDbConnectionString=Host=Database;Database=Store;Username=postgres;Password=${POSTGRES_PASSWORD};SearchPath=notifications
       - JwtOptions__SecretKey=${JWT_SECRET_KEY}
       - JwtOptions__Issuer=${JWT_ISSUER}
       - JwtOptions__Audience=${JWT_AUDIENCE}
+      - Cors__AllowedOrigins__0=${CORS_ALLOWED_ORIGIN:-}
+      - SmtpOptions__Username=${SMTP_USERNAME}
+      - SmtpOptions__Password=${SMTP_PASSWORD}
+      - SmtpOptions__FromAddress=${SMTP_FROM_ADDRESS}
   
   Database:
     image: postgres:latest
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: Store
     volumes:
       - database_volume:/var/lib/postgresql/data
     networks:
       - store_network
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d Store"]
       interval: 5s

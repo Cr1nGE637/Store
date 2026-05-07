@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Store.Catalog.Application.DTOs;
 using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
@@ -11,13 +12,16 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 {
     private readonly IProductRepository _productRepository;
     private readonly ICatalogUnitOfWork _unitOfWork;
-    private readonly IPublisher _publisher;
+    private readonly ICatalogDomainEventOutbox _outbox;
 
-    public UpdateProductCommandHandler(IProductRepository productRepository, ICatalogUnitOfWork unitOfWork, IPublisher publisher)
+    public UpdateProductCommandHandler(
+        IProductRepository productRepository,
+        ICatalogUnitOfWork unitOfWork,
+        ICatalogDomainEventOutbox outbox)
     {
         _productRepository = productRepository;
         _unitOfWork = unitOfWork;
-        _publisher = publisher;
+        _outbox = outbox;
     }
 
     public async Task<Result<GetProductDto>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -26,21 +30,33 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         if (existingResult.IsFailure)
             return Result.Failure<GetProductDto>("Product not found");
 
+        var duplicateName = await _productRepository.GetByNameAsync(request.ProductName);
+        if (duplicateName.IsSuccess && duplicateName.Value.ProductId != request.ProductId)
+            return Result.Failure<GetProductDto>("Product already exists");
+
         var product = existingResult.Value;
         var updateResult = product.Update(request.ProductName, request.ProductDescription, request.ProductPrice, request.CategoryId);
         if (updateResult.IsFailure)
             return Result.Failure<GetProductDto>(updateResult.Error);
+        if (!updateResult.Value)
+            return Result.Success(CatalogMappings.ToGetProductDto(product));
 
-        var savedResult = await _productRepository.UpdateAsync(product);
-        if (savedResult.IsFailure)
-            return Result.Failure<GetProductDto>(savedResult.Error);
+        var saveResult = await _productRepository.UpdateAsync(product);
+        if (saveResult.IsFailure)
+            return Result.Failure<GetProductDto>(saveResult.Error);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _outbox.AddAsync(product.DomainEvents, cancellationToken);
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (CatalogPersistenceErrors.IsUniqueViolation(ex))
+        {
+            return Result.Failure<GetProductDto>("Product already exists");
+        }
 
-        foreach (var domainEvent in product.DomainEvents)
-            await _publisher.Publish(domainEvent, cancellationToken);
         product.ClearDomainEvents();
 
-        return Result.Success(CatalogMappings.ToGetProductDto(savedResult.Value));
+        return Result.Success(CatalogMappings.ToGetProductDto(product));
     }
 }

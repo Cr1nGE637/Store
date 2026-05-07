@@ -48,7 +48,8 @@ public class CartController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Checkout(CancellationToken cancellationToken)
     {
         if (!TryGetCustomerId(out var customerId)) return Unauthorized();
-        var result = await mediator.Send(new CheckoutCommand { CustomerId = customerId }, cancellationToken);
+        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
+        var result = await mediator.Send(new CheckoutCommand { CustomerId = customerId, CustomerEmail = email }, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 

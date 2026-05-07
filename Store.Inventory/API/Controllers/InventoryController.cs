@@ -12,6 +12,7 @@ namespace Store.Inventory.API.Controllers;
 public class InventoryController(IMediator mediator) : ControllerBase
 {
     [HttpGet("{productId:guid}")]
+    [Authorize(Roles = "Manager")]
     public async Task<IActionResult> GetStock(Guid productId)
     {
         var result = await mediator.Send(new GetStockQuery(productId));

@@ -16,6 +16,14 @@ public class Money : ValueObject
         return Result.Success(new Money(amount));
     }
 
+    internal static Money Reconstitute(decimal amount)
+    {
+        var result = Create(amount);
+        if (result.IsFailure)
+            throw new InvalidOperationException($"Corrupt Money in storage: {result.Error}");
+        return result.Value;
+    }
+
     public static implicit operator decimal(Money money) => money.Amount;
 
     public override string ToString() => Amount.ToString("F2");

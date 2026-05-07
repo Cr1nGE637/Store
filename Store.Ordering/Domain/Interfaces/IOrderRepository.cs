@@ -7,6 +7,7 @@ public interface IOrderRepository
 {
     Task<Result<Order>> GetByIdAsync(Guid orderId);
     Task<IReadOnlyList<Order>> GetByCustomerIdAsync(Guid customerId);
+    Task<IReadOnlyList<Order>> GetByCustomerIdAsync(Guid customerId, int skip, int take);
     Task<Result> AddAsync(Order order);
     Task<Result> UpdateAsync(Order order);
 }

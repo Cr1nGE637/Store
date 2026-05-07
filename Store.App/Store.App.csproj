@@ -24,6 +24,7 @@
       <ProjectReference Include="..\Store.Inventory\Store.Inventory.csproj" />
       <ProjectReference Include="..\Store.Catalog\Store.Catalog.csproj" />
       <ProjectReference Include="..\Store.Identity\Store.Identity.csproj" />
+      <ProjectReference Include="..\Store.Notifications\Store.Notifications.csproj" />
     </ItemGroup>
 
     <ItemGroup>

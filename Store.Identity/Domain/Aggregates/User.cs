@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using Store.Identity.Contracts.Events;
 using Store.Identity.Domain.Enums;
 using Store.Identity.Domain.ValueObjects;
 using Store.SharedKernel;
@@ -30,7 +31,10 @@ public class User : AggregateRoot
         if (name.Length > 50)
             return Result.Failure<User>("Name cannot exceed 50 characters.");
 
-        return Result.Success(new User(Guid.NewGuid(), name, email, password, role));
+        var user = new User(Guid.NewGuid(), name, email, password, role);
+        user.RaiseDomainEvent(new UserRegisteredEvent(user.Id, user.Email.Value, user.Name));
+
+        return Result.Success(user);
     }
 
     internal static User Reconstitute(Guid id, string name, Email email, string password, UserRole role) =>

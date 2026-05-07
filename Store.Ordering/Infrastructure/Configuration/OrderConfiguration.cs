@@ -11,6 +11,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<OrderEntity>
         builder.ToTable("Orders");
         builder.HasKey(o => o.OrderId);
         builder.Property(o => o.CustomerId).IsRequired();
+        builder.Property(o => o.CustomerEmail).IsRequired().HasMaxLength(256);
         builder.Property(o => o.Status).IsRequired().HasConversion<string>();
         builder.Property(o => o.CreatedAt).IsRequired();
         builder.Property(o => o.PaidAt);

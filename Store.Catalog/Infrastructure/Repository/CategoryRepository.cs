@@ -18,7 +18,21 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<Result<List<Category>>> GetAllAsync()
     {
-        var entities = await _dbContext.Categories.AsNoTracking().ToListAsync();
+        var entities = await _dbContext.Categories
+            .AsNoTracking()
+            .OrderBy(c => c.CategoryName)
+            .ToListAsync();
+        return Result.Success(entities.Select(ToDomain).ToList());
+    }
+
+    public async Task<Result<List<Category>>> GetPageAsync(int skip, int take)
+    {
+        var entities = await _dbContext.Categories
+            .AsNoTracking()
+            .OrderBy(c => c.CategoryName)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
         return Result.Success(entities.Select(ToDomain).ToList());
     }
 
@@ -32,20 +46,30 @@ public class CategoryRepository : ICategoryRepository
         return Result.Success(ToDomain(entity));
     }
 
+    public async Task<Result<Category>> GetByNameAsync(string name)
+    {
+        var normalizedName = name.Trim();
+        var entity = await _dbContext.Categories.AsNoTracking()
+            .FirstOrDefaultAsync(c => EF.Functions.ILike(c.CategoryName, normalizedName));
+        if (entity == null)
+            return Result.Failure<Category>("Category not found");
+
+        return Result.Success(ToDomain(entity));
+    }
+
     public async Task AddAsync(Category category)
     {
         await _dbContext.Categories.AddAsync(ToEntity(category));
     }
 
-    public async Task<Result<Category>> UpdateAsync(Category category)
+    public async Task<Result> UpdateAsync(Category category)
     {
         var entity = await _dbContext.Categories.FirstOrDefaultAsync(c => c.CategoryId == category.CategoryId);
         if (entity == null)
-            return Result.Failure<Category>("Category not found");
+            return Result.Failure("Category not found");
 
         entity.CategoryName = category.CategoryName;
-
-        return Result.Success(ToDomain(entity));
+        return Result.Success();
     }
 
     public async Task<Result> DeleteAsync(Guid id)

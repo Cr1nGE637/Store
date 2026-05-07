@@ -17,7 +17,11 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<
 
     public async Task<Result<List<GetProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var result = await _productRepository.GetAllAsync();
+        var pagination = Pagination.Normalize(request.Page, request.PageSize);
+        if (pagination.IsFailure)
+            return Result.Failure<List<GetProductDto>>(pagination.Error);
+
+        var result = await _productRepository.GetPageAsync(pagination.Value.Skip, pagination.Value.Take);
         if (result.IsFailure)
             return Result.Failure<List<GetProductDto>>(result.Error);
 

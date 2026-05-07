@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Store.EventOutbox.Infrastructure.Extensions;
 using Store.Catalog.Infrastructure.Entity;
 
 namespace Store.Catalog.Infrastructure.DbContexts;
@@ -12,5 +13,6 @@ public class CatalogDbContext(DbContextOptions<CatalogDbContext> options) :  DbC
     {
         modelBuilder.HasDefaultSchema("catalog");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);
+        modelBuilder.ConfigureDomainEventOutbox();
     }
 }

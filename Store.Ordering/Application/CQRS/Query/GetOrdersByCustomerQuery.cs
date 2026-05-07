@@ -4,4 +4,5 @@ using Store.Ordering.Application.DTOs;
 
 namespace Store.Ordering.Application.CQRS.Query;
 
-public record GetOrdersByCustomerQuery(Guid CustomerId) : IRequest<Result<IReadOnlyList<GetOrderDto>>>;
+public record GetOrdersByCustomerQuery(Guid CustomerId, int Page = 1, int PageSize = 50)
+    : IRequest<Result<IReadOnlyList<GetOrderDto>>>;

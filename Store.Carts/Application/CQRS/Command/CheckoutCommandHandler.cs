@@ -10,7 +10,7 @@ namespace Store.Carts.Application.CQRS.Command;
 public class CheckoutCommandHandler(
     ICartRepository cartRepository,
     ICartUnitOfWork unitOfWork,
-    IPublisher publisher) : IRequestHandler<CheckoutCommand, Result<CheckoutResultDto>>
+    ICartDomainEventOutbox outbox) : IRequestHandler<CheckoutCommand, Result<CheckoutResultDto>>
 {
     public async Task<Result<CheckoutResultDto>> Handle(CheckoutCommand request, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ public class CheckoutCommandHandler(
 
         var cart = cartResult.Value;
 
-        var checkoutResult = cart.Checkout();
+        var checkoutResult = cart.Checkout(request.CustomerEmail);
         if (checkoutResult.IsFailure)
             return Result.Failure<CheckoutResultDto>(checkoutResult.Error);
 
@@ -30,10 +30,8 @@ public class CheckoutCommandHandler(
         if (updateResult.IsFailure)
             return Result.Failure<CheckoutResultDto>(updateResult.Error);
 
+        await outbox.AddAsync(cart.DomainEvents, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        foreach (var domainEvent in cart.DomainEvents)
-            await publisher.Publish(domainEvent, cancellationToken);
         cart.ClearDomainEvents();
 
         return Result.Success(CartMappings.ToCheckoutResultDto(cart, items));

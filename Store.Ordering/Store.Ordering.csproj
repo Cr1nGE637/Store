@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Store.SharedKernel\Store.SharedKernel.csproj" />
+        <ProjectReference Include="..\Store.EventOutbox\Store.EventOutbox.csproj" />
         <ProjectReference Include="..\Store.Carts.Contracts\Store.Carts.Contracts.csproj" />
         <ProjectReference Include="..\Store.Ordering.Contracts\Store.Ordering.Contracts.csproj" />
     </ItemGroup>

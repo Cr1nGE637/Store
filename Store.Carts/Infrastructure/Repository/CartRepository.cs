@@ -58,7 +58,6 @@ public class CartRepository(CartDbContext context) : ICartRepository
         {
             var itemEntity = MapItemToEntity(added, cart.CartId);
             entity.Items.Add(itemEntity);
-            context.Entry(itemEntity).State = EntityState.Added;
         }
 
         foreach (var domainItem in cart.Items.Where(i => existingById.ContainsKey(i.CartItemId)))
@@ -89,4 +88,3 @@ public class CartRepository(CartDbContext context) : ICartRepository
         Quantity = item.Quantity
     };
 }
-

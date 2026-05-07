@@ -19,11 +19,18 @@ public class GetProductsByCategoryQueryHandler : IRequestHandler<GetProductsByCa
 
     public async Task<Result<List<GetProductDto>>> Handle(GetProductsByCategoryQuery request, CancellationToken cancellationToken)
     {
+        var pagination = Pagination.Normalize(request.Page, request.PageSize);
+        if (pagination.IsFailure)
+            return Result.Failure<List<GetProductDto>>(pagination.Error);
+
         var categoryResult = await _categoryRepository.GetByIdAsync(request.CategoryId);
         if (categoryResult.IsFailure)
             return Result.Failure<List<GetProductDto>>("Category not found");
 
-        var productsResult = await _productRepository.GetByCategoryIdAsync(request.CategoryId);
+        var productsResult = await _productRepository.GetByCategoryIdAsync(
+            request.CategoryId,
+            pagination.Value.Skip,
+            pagination.Value.Take);
         if (productsResult.IsFailure)
             return Result.Failure<List<GetProductDto>>(productsResult.Error);
 

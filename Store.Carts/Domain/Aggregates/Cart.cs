@@ -35,7 +35,7 @@ public class Cart : AggregateRoot
     {
         var existing = _items.FirstOrDefault(i => i.ProductId == productId);
         if (existing != null)
-            return existing.ChangeQuantity(existing.Quantity + quantity);
+            return existing.RefreshProductInfoAndChangeQuantity(productName, price, existing.Quantity + quantity);
 
         var itemResult = CartItem.Create(productId, productName, price, quantity);
         if (itemResult.IsFailure)
@@ -64,7 +64,7 @@ public class Cart : AggregateRoot
         return item.ChangeQuantity(quantity);
     }
 
-    public Result<IReadOnlyList<CartItem>> Checkout()
+    public Result<IReadOnlyList<CartItem>> Checkout(string customerEmail)
     {
         if (_items.Count == 0)
             return Result.Failure<IReadOnlyList<CartItem>>("Cart is empty");
@@ -75,7 +75,7 @@ public class Cart : AggregateRoot
         var eventItems = snapshot
             .Select(i => new CartCheckedOutItem(i.ProductId, i.ProductName, i.Price, i.Quantity))
             .ToList();
-        RaiseDomainEvent(new CartCheckedOutEvent(CartId, CustomerId, eventItems));
+        RaiseDomainEvent(new CartCheckedOutEvent(CartId, CustomerId, customerEmail, eventItems));
 
         return Result.Success<IReadOnlyList<CartItem>>(snapshot);
     }

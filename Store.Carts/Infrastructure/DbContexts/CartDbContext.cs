@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Store.EventOutbox.Infrastructure.Extensions;
 using Store.Carts.Infrastructure.Entity;
 
 namespace Store.Carts.Infrastructure.DbContexts;
@@ -13,5 +14,6 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
     {
         modelBuilder.HasDefaultSchema("cart");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CartDbContext).Assembly);
+        modelBuilder.ConfigureDomainEventOutbox();
     }
 }

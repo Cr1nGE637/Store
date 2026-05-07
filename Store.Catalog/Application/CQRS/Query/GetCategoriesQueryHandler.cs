@@ -17,7 +17,11 @@ public class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, Res
 
     public async Task<Result<List<GetCategoryDto>>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var result = await _categoryRepository.GetAllAsync();
+        var pagination = Pagination.Normalize(request.Page, request.PageSize);
+        if (pagination.IsFailure)
+            return Result.Failure<List<GetCategoryDto>>(pagination.Error);
+
+        var result = await _categoryRepository.GetPageAsync(pagination.Value.Skip, pagination.Value.Take);
         if (result.IsFailure)
             return Result.Failure<List<GetCategoryDto>>(result.Error);
 

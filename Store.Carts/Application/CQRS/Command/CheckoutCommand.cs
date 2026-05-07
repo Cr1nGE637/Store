@@ -7,4 +7,5 @@ namespace Store.Carts.Application.CQRS.Command;
 public class CheckoutCommand : IRequest<Result<CheckoutResultDto>>
 {
     public Guid CustomerId { get; init; }
+    public string CustomerEmail { get; init; } = string.Empty;
 }

@@ -22,10 +22,10 @@ public class OrdersController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("my")]
-    public async Task<IActionResult> GetMy()
+    public async Task<IActionResult> GetMy([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         if (!TryGetRequesterId(out var customerId)) return Unauthorized();
-        var result = await mediator.Send(new GetOrdersByCustomerQuery(customerId));
+        var result = await mediator.Send(new GetOrdersByCustomerQuery(customerId, page, pageSize));
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
@@ -38,10 +38,11 @@ public class OrdersController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("{orderId:guid}/cancel")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> Cancel(Guid orderId)
     {
         if (!TryGetRequesterId(out var requesterId)) return Unauthorized();
-        var result = await mediator.Send(new CancelOrderCommand(orderId, requesterId, IsManager()));
+        var result = await mediator.Send(new CancelOrderCommand(orderId, requesterId));
         if (result.IsFailure)
             return result.Error == "Access denied" ? Forbid() : BadRequest(result.Error);
         return Ok();

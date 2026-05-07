@@ -51,9 +51,13 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("category/{categoryId:guid}")]
-    public async Task<ActionResult<List<GetProductDto>>> GetProductsByCategory(Guid categoryId, CancellationToken token)
+    public async Task<ActionResult<List<GetProductDto>>> GetProductsByCategory(
+        Guid categoryId,
+        CancellationToken token,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
-        var result = await _mediator.Send(new GetProductsByCategoryQuery(categoryId), token);
+        var result = await _mediator.Send(new GetProductsByCategoryQuery(categoryId, page, pageSize), token);
         if (result.IsFailure)
             return NotFound(result.Error);
 

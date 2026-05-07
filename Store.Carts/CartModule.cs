@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Store.EventOutbox.Infrastructure.Services;
 using Store.Carts.Application.CQRS.Command;
 using Store.Carts.Application.Interfaces;
 using Store.Carts.Domain.Interfaces;
@@ -17,7 +18,11 @@ public static class CartModule
         services.AddDbContext<CartDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("CartDbConnectionString"),
-                npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "cart")));
+                npgsql =>
+                {
+                    npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "cart");
+                    npgsql.EnableRetryOnFailure();
+                }));
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(AddItemCommand).Assembly));
@@ -25,6 +30,8 @@ public static class CartModule
         services.AddScoped<ICartRepository, CartRepository>();
         services.AddScoped<IProductCacheRepository, ProductCacheRepository>();
         services.AddScoped<ICartUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICartDomainEventOutbox, CartDomainEventOutbox>();
+        services.AddHostedService<DomainEventOutboxProcessor<CartDbContext>>();
 
         return services;
     }

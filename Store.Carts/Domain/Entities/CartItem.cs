@@ -47,4 +47,21 @@ public class CartItem
         Quantity = quantity;
         return Result.Success();
     }
+
+    internal Result RefreshProductInfoAndChangeQuantity(string productName, decimal price, int quantity)
+    {
+        if (string.IsNullOrWhiteSpace(productName))
+            return Result.Failure("Product name is required");
+
+        if (price <= 0)
+            return Result.Failure("Price must be greater than zero");
+
+        var quantityResult = ChangeQuantity(quantity);
+        if (quantityResult.IsFailure)
+            return quantityResult;
+
+        ProductName = productName;
+        Price = price;
+        return Result.Success();
+    }
 }

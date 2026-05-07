@@ -10,7 +10,7 @@ namespace Store.Inventory.Application.EventHandlers;
 public class OrderPaidEventHandler(
     IStockItemRepository repository,
     IInventoryUnitOfWork unitOfWork,
-    IPublisher publisher,
+    IInventoryDomainEventOutbox outbox,
     ILogger<OrderPaidEventHandler> logger) : INotificationHandler<OrderPaidEvent>
 {
     public async Task Handle(OrderPaidEvent notification, CancellationToken cancellationToken)
@@ -46,13 +46,12 @@ public class OrderPaidEventHandler(
             deducted.Add(stockItem);
         }
 
+        foreach (var stockItem in deducted)
+            await outbox.AddAsync(stockItem.DomainEvents, cancellationToken);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         foreach (var stockItem in deducted)
-        {
-            foreach (var domainEvent in stockItem.DomainEvents)
-                await publisher.Publish(domainEvent, cancellationToken);
             stockItem.ClearDomainEvents();
-        }
     }
 }
