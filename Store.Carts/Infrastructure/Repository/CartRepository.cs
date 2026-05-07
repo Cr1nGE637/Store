@@ -20,7 +20,7 @@ public class CartRepository(CartDbContext context) : ICartRepository
         if (entity == null)
             return Result.Failure<Cart>("Cart not found");
 
-        var cart = Cart.Reconstitute(entity.CartId, entity.CustomerId);
+        var cart = Cart.Reconstitute(entity.CartId, entity.CustomerId, entity.IsCheckoutPending);
 
         var items = entity.Items.Select(i =>
             CartItem.Reconstitute(i.CartItemId, i.ProductId, i.ProductName, i.Price, i.Quantity));
@@ -47,6 +47,8 @@ public class CartRepository(CartDbContext context) : ICartRepository
 
         if (entity == null)
             return Result.Failure("Cart not found");
+
+        entity.IsCheckoutPending = cart.IsCheckoutPending;
 
         var existingById = entity.Items.ToDictionary(i => i.CartItemId);
         var domainById = cart.Items.ToDictionary(i => i.CartItemId);
@@ -75,6 +77,7 @@ public class CartRepository(CartDbContext context) : ICartRepository
     {
         CartId = cart.CartId,
         CustomerId = cart.CustomerId,
+        IsCheckoutPending = cart.IsCheckoutPending,
         Items = cart.Items.Select(i => MapItemToEntity(i, cart.CartId)).ToList()
     };
 

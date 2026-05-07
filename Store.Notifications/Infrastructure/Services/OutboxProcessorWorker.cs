@@ -56,7 +56,7 @@ public class OutboxProcessorWorker(
         {
             try
             {
-                await sender.SendAsync(msg.To, msg.Subject, msg.Body, ct);
+                await sender.SendAsync(msg.Id, msg.To, msg.Subject, msg.Body, ct);
                 msg.MarkAsProcessed();
             }
             catch (Exception ex)

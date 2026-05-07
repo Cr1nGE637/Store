@@ -23,7 +23,7 @@ public class CartTests
     }
 
     [Fact]
-    public void Checkout_WhenCartHasItems_ReturnsSnapshotClearsCartAndRaisesEvent()
+    public void Checkout_WhenCartHasItems_ReturnsSnapshotKeepsItemsPendingAndRaisesEvent()
     {
         var customerId = Guid.NewGuid();
         var productId = Guid.NewGuid();
@@ -35,7 +35,8 @@ public class CartTests
         Assert.True(result.IsSuccess);
         var checkedOutItem = Assert.Single(result.Value);
         Assert.Equal(productId, checkedOutItem.ProductId);
-        Assert.Empty(cart.Items);
+        Assert.Single(cart.Items);
+        Assert.True(cart.IsCheckoutPending);
 
         var domainEvent = Assert.IsType<CartCheckedOutEvent>(Assert.Single(cart.DomainEvents));
         Assert.Equal(cart.CartId, domainEvent.CartId);
@@ -47,6 +48,37 @@ public class CartTests
         Assert.Equal("Keyboard", eventItem.ProductName);
         Assert.Equal(99.9m, eventItem.Price);
         Assert.Equal(2, eventItem.Quantity);
+    }
+
+    [Fact]
+    public void AddItem_WhenCheckoutIsPending_FailsWithoutChangingSnapshot()
+    {
+        var cart = Cart.Create(Guid.NewGuid()).Value;
+        var productId = Guid.NewGuid();
+        cart.AddItem(productId, "Keyboard", 99.9m, 2);
+        cart.Checkout("customer@example.com");
+
+        var result = cart.AddItem(Guid.NewGuid(), "Mouse", 49.9m, 1);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal("Cart checkout is pending", result.Error);
+        var item = Assert.Single(cart.Items);
+        Assert.Equal(productId, item.ProductId);
+    }
+
+    [Fact]
+    public void CompleteCheckout_WhenCheckoutIsPending_ClearsCartAndUnlocksIt()
+    {
+        var cart = Cart.Create(Guid.NewGuid()).Value;
+        cart.AddItem(Guid.NewGuid(), "Keyboard", 99.9m, 2);
+        cart.Checkout("customer@example.com");
+
+        var result = cart.CompleteCheckout();
+
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value);
+        Assert.Empty(cart.Items);
+        Assert.False(cart.IsCheckoutPending);
     }
 
     [Fact]

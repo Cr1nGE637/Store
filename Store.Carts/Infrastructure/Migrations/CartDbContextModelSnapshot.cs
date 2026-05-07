@@ -32,6 +32,9 @@ namespace Store.Carts.Infrastructure.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsCheckoutPending")
+                        .HasColumnType("boolean");
+
                     b.HasKey("CartId");
 
                     b.HasIndex("CustomerId")

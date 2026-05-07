@@ -10,6 +10,9 @@ public class CartConfiguration : IEntityTypeConfiguration<CartEntity>
     {
         builder.HasKey(c => c.CartId);
 
+        builder.Property(c => c.IsCheckoutPending)
+            .IsRequired();
+
         builder.HasIndex(c => c.CustomerId).IsUnique();
 
         builder.HasMany(c => c.Items)

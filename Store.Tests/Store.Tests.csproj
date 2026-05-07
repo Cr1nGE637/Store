@@ -24,6 +24,8 @@
     <ItemGroup>
         <ProjectReference Include="..\Store.Carts\Store.Carts.csproj" />
         <ProjectReference Include="..\Store.Catalog\Store.Catalog.csproj" />
+        <ProjectReference Include="..\Store.Inventory\Store.Inventory.csproj" />
+        <ProjectReference Include="..\Store.Notifications\Store.Notifications.csproj" />
         <ProjectReference Include="..\Store.Ordering\Store.Ordering.csproj" />
     </ItemGroup>
 
