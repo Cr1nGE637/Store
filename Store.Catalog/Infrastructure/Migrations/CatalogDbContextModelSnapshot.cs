@@ -93,6 +93,24 @@ namespace Store.Catalog.Infrastructure.Migrations
                     b.ToTable("Products", "catalog");
                 });
 
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductAvailabilityEntity", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AvailableQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ProductId");
+
+                    b.HasIndex("AvailableQuantity");
+
+                    b.ToTable("ProductAvailabilities", "catalog");
+                });
+
             modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductSpecificationEntity", b =>
                 {
                     b.Property<Guid>("ProductId")

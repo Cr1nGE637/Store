@@ -10,6 +10,7 @@
       <ProjectReference Include="..\Store.SharedKernel\Store.SharedKernel.csproj" />
       <ProjectReference Include="..\Store.EventOutbox\Store.EventOutbox.csproj" />
       <ProjectReference Include="..\Store.Catalog.Contracts\Store.Catalog.Contracts.csproj" />
+      <ProjectReference Include="..\Store.Inventory.Contracts\Store.Inventory.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>

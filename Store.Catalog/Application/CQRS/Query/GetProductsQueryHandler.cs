@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using MediatR;
 using Store.Catalog.Application.DTOs;
+using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
 using Store.Catalog.Domain.Interfaces;
 
@@ -9,10 +10,14 @@ namespace Store.Catalog.Application.CQRS.Query;
 public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<List<GetProductDto>>>
 {
     private readonly IProductRepository _productRepository;
+    private readonly IProductAvailabilityRepository _availabilityRepository;
 
-    public GetProductsQueryHandler(IProductRepository productRepository)
+    public GetProductsQueryHandler(
+        IProductRepository productRepository,
+        IProductAvailabilityRepository availabilityRepository)
     {
         _productRepository = productRepository;
+        _availabilityRepository = availabilityRepository;
     }
 
     public async Task<Result<List<GetProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
@@ -31,6 +36,7 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<
             request.MinPrice,
             request.MaxPrice,
             request.SpecificationFilters,
+            request.InStockOnly,
             pagination.Value.Skip,
             pagination.Value.Take);
 
@@ -38,6 +44,14 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<
         if (result.IsFailure)
             return Result.Failure<List<GetProductDto>>(result.Error);
 
-        return Result.Success(result.Value.Select(CatalogMappings.ToGetProductDto).ToList());
+        var availability = await _availabilityRepository.GetAvailableQuantitiesAsync(
+            result.Value.Select(product => product.ProductId).ToArray(),
+            cancellationToken);
+
+        return Result.Success(result.Value
+            .Select(product => CatalogMappings.ToGetProductDto(
+                product,
+                availability.GetValueOrDefault(product.ProductId)))
+            .ToList());
     }
 }

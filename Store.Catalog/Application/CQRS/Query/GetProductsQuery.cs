@@ -13,5 +13,6 @@ public class GetProductsQuery : IRequest<Result<List<GetProductDto>>>
     public string? Brand { get; init; }
     public decimal? MinPrice { get; init; }
     public decimal? MaxPrice { get; init; }
+    public bool InStockOnly { get; init; }
     public Dictionary<string, string> SpecificationFilters { get; init; } = [];
 }

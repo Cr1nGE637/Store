@@ -1,6 +1,7 @@
 using CSharpFunctionalExtensions;
 using MediatR;
 using Store.Catalog.Application.DTOs;
+using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
 using Store.Catalog.Domain.Interfaces;
 
@@ -10,11 +11,16 @@ public class GetProductsByCategoryQueryHandler : IRequestHandler<GetProductsByCa
 {
     private readonly IProductRepository _productRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IProductAvailabilityRepository _availabilityRepository;
 
-    public GetProductsByCategoryQueryHandler(IProductRepository productRepository, ICategoryRepository categoryRepository)
+    public GetProductsByCategoryQueryHandler(
+        IProductRepository productRepository,
+        ICategoryRepository categoryRepository,
+        IProductAvailabilityRepository availabilityRepository)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
+        _availabilityRepository = availabilityRepository;
     }
 
     public async Task<Result<List<GetProductDto>>> Handle(GetProductsByCategoryQuery request, CancellationToken cancellationToken)
@@ -34,6 +40,14 @@ public class GetProductsByCategoryQueryHandler : IRequestHandler<GetProductsByCa
         if (productsResult.IsFailure)
             return Result.Failure<List<GetProductDto>>(productsResult.Error);
 
-        return Result.Success(productsResult.Value.Select(CatalogMappings.ToGetProductDto).ToList());
+        var availability = await _availabilityRepository.GetAvailableQuantitiesAsync(
+            productsResult.Value.Select(product => product.ProductId).ToArray(),
+            cancellationToken);
+
+        return Result.Success(productsResult.Value
+            .Select(product => CatalogMappings.ToGetProductDto(
+                product,
+                availability.GetValueOrDefault(product.ProductId)))
+            .ToList());
     }
 }

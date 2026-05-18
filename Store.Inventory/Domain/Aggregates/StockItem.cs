@@ -21,13 +21,16 @@ public class StockItem : AggregateRoot
         if (initialQuantity < 0)
             return Result.Failure<StockItem>("Initial quantity cannot be negative");
 
-        return Result.Success(new StockItem
+        var stockItem = new StockItem
         {
             Id = Guid.NewGuid(),
             ProductId = productId,
             Quantity = initialQuantity,
             Reserved = 0
-        });
+        };
+
+        stockItem.RaiseStockChangedEvent();
+        return Result.Success(stockItem);
     }
 
     internal static StockItem Reconstitute(Guid id, Guid productId, int quantity, int reserved) =>
@@ -39,6 +42,7 @@ public class StockItem : AggregateRoot
             return Result.Failure("Amount must be positive");
 
         Quantity += amount;
+        RaiseStockChangedEvent();
         return Result.Success();
     }
 
@@ -50,6 +54,7 @@ public class StockItem : AggregateRoot
             return Result.Failure($"Insufficient stock: available {Available}, requested {amount}");
 
         Reserved += amount;
+        RaiseStockChangedEvent();
 
         if (Available == 0)
             RaiseDomainEvent(new StockDepletedEvent(ProductId));
@@ -65,6 +70,7 @@ public class StockItem : AggregateRoot
             return Result.Failure($"Cannot release {amount}: only {Reserved} reserved");
 
         Reserved -= amount;
+        RaiseStockChangedEvent();
         return Result.Success();
     }
 
@@ -77,6 +83,9 @@ public class StockItem : AggregateRoot
 
         Reserved -= amount;
         Quantity -= amount;
+        RaiseStockChangedEvent();
         return Result.Success();
     }
+
+    private void RaiseStockChangedEvent() => RaiseDomainEvent(new StockChangedEvent(ProductId, Available));
 }

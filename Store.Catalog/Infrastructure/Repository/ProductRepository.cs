@@ -72,6 +72,11 @@ public class ProductRepository : IProductRepository
         if (criteria.MaxPrice.HasValue)
             query = query.Where(p => p.ProductPrice <= criteria.MaxPrice.Value);
 
+        if (criteria.InStockOnly)
+            query = query.Where(p => _dbContext.ProductAvailabilities.Any(a =>
+                a.ProductId == p.ProductId
+                && a.AvailableQuantity > 0));
+
         foreach (var filter in criteria.SpecificationFilters)
         {
             var name = filter.Key.Trim();

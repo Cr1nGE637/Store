@@ -28,6 +28,7 @@ public static class CatalogModule
             cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
 
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductAvailabilityRepository, ProductAvailabilityRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICatalogUnitOfWork, UnitOfWork>();
         services.AddScoped<ICatalogDomainEventOutbox, CatalogDomainEventOutbox>();

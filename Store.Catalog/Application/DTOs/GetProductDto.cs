@@ -10,4 +10,6 @@ public record GetProductDto(
     string Model,
     int WarrantyMonths,
     Guid CategoryId,
-    IReadOnlyDictionary<string, string> Specifications);
+    IReadOnlyDictionary<string, string> Specifications,
+    int AvailableQuantity,
+    bool IsInStock);

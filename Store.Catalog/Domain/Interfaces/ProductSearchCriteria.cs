@@ -7,5 +7,6 @@ public record ProductSearchCriteria(
     decimal? MinPrice,
     decimal? MaxPrice,
     IReadOnlyDictionary<string, string> SpecificationFilters,
+    bool InStockOnly,
     int Skip,
     int Take);

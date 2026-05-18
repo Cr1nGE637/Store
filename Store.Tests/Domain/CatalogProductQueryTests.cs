@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using Store.Catalog.Application.CQRS.Query;
+using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
 using Store.Catalog.Domain.Interfaces;
 
@@ -11,7 +12,7 @@ public class CatalogProductQueryTests
     public async Task GetProductsQueryHandler_PassesElectronicsFiltersToRepository()
     {
         var repository = new CapturingProductRepository();
-        var handler = new GetProductsQueryHandler(repository);
+        var handler = new GetProductsQueryHandler(repository, new FakeProductAvailabilityRepository());
 
         var result = await handler.Handle(
             new GetProductsQuery
@@ -21,6 +22,7 @@ public class CatalogProductQueryTests
                 Brand = "Lenovo",
                 MinPrice = 50000m,
                 MaxPrice = 150000m,
+                InStockOnly = true,
                 Page = 2,
                 PageSize = 10,
                 SpecificationFilters = new Dictionary<string, string> { ["Processor"] = "Ryzen 7" }
@@ -33,6 +35,7 @@ public class CatalogProductQueryTests
         Assert.Equal("Lenovo", repository.LastCriteria.Brand);
         Assert.Equal(50000m, repository.LastCriteria.MinPrice);
         Assert.Equal(150000m, repository.LastCriteria.MaxPrice);
+        Assert.True(repository.LastCriteria.InStockOnly);
         Assert.Equal(10, repository.LastCriteria.Skip);
         Assert.Equal(10, repository.LastCriteria.Take);
         Assert.Equal("Ryzen 7", repository.LastCriteria.SpecificationFilters["Processor"]);
@@ -41,7 +44,9 @@ public class CatalogProductQueryTests
     [Fact]
     public async Task GetProductsQueryHandler_WhenMinPriceIsGreaterThanMaxPrice_ReturnsFailure()
     {
-        var handler = new GetProductsQueryHandler(new CapturingProductRepository());
+        var handler = new GetProductsQueryHandler(
+            new CapturingProductRepository(),
+            new FakeProductAvailabilityRepository());
 
         var result = await handler.Handle(
             new GetProductsQuery { MinPrice = 100m, MaxPrice = 50m },
@@ -49,6 +54,17 @@ public class CatalogProductQueryTests
 
         Assert.True(result.IsFailure);
         Assert.Equal("Minimum price cannot be greater than maximum price", result.Error);
+    }
+
+    private sealed class FakeProductAvailabilityRepository : IProductAvailabilityRepository
+    {
+        public Task<IReadOnlyDictionary<Guid, int>> GetAvailableQuantitiesAsync(
+            IReadOnlyCollection<Guid> productIds,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, int>>(new Dictionary<Guid, int>());
+
+        public Task UpsertAsync(Guid productId, int availableQuantity, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
     }
 
     private sealed class CapturingProductRepository : IProductRepository

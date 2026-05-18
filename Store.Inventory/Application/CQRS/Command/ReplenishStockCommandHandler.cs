@@ -8,7 +8,8 @@ namespace Store.Inventory.Application.CQRS.Command;
 
 public class ReplenishStockCommandHandler(
     IStockItemRepository repository,
-    IInventoryUnitOfWork unitOfWork) : IRequestHandler<ReplenishStockCommand, Result>
+    IInventoryUnitOfWork unitOfWork,
+    IInventoryDomainEventOutbox outbox) : IRequestHandler<ReplenishStockCommand, Result>
 {
     public async Task<Result> Handle(ReplenishStockCommand request, CancellationToken cancellationToken)
     {
@@ -23,19 +24,27 @@ public class ReplenishStockCommandHandler(
             if (createResult.IsFailure)
                 return Result.Failure(createResult.Error);
 
-            var addResult = await repository.AddAsync(createResult.Value);
+            var stockItem = createResult.Value;
+            var addResult = await repository.AddAsync(stockItem);
             if (addResult.IsFailure)
                 return addResult;
+
+            await outbox.AddAsync(stockItem.DomainEvents, cancellationToken);
+            stockItem.ClearDomainEvents();
         }
         else
         {
-            var replenishResult = existing.Value.Replenish(request.Amount);
+            var stockItem = existing.Value;
+            var replenishResult = stockItem.Replenish(request.Amount);
             if (replenishResult.IsFailure)
                 return replenishResult;
 
-            var updateResult = await repository.UpdateAsync(existing.Value);
+            var updateResult = await repository.UpdateAsync(stockItem);
             if (updateResult.IsFailure)
                 return updateResult;
+
+            await outbox.AddAsync(stockItem.DomainEvents, cancellationToken);
+            stockItem.ClearDomainEvents();
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

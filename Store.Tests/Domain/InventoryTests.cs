@@ -26,7 +26,9 @@ public class InventoryTests
         Assert.Equal(10, stockItem.Quantity);
         Assert.Equal(0, stockItem.Reserved);
         Assert.Equal(10, stockItem.Available);
-        Assert.Empty(stockItem.DomainEvents);
+        var domainEvent = Assert.IsType<StockChangedEvent>(Assert.Single(stockItem.DomainEvents));
+        Assert.Equal(productId, domainEvent.ProductId);
+        Assert.Equal(10, domainEvent.AvailableQuantity);
     }
 
     [Fact]
@@ -77,7 +79,7 @@ public class InventoryTests
     }
 
     [Fact]
-    public void Reserve_WhenEnoughStock_ReservesQuantityWithoutDomainEvent()
+    public void Reserve_WhenEnoughStock_ReservesQuantityAndRaisesStockChangedEvent()
     {
         var stockItem = CreateStockItem(initialQuantity: 10);
 
@@ -87,7 +89,8 @@ public class InventoryTests
         Assert.Equal(10, stockItem.Quantity);
         Assert.Equal(4, stockItem.Reserved);
         Assert.Equal(6, stockItem.Available);
-        Assert.Empty(stockItem.DomainEvents);
+        var domainEvent = Assert.IsType<StockChangedEvent>(Assert.Single(stockItem.DomainEvents));
+        Assert.Equal(6, domainEvent.AvailableQuantity);
     }
 
     [Fact]
@@ -101,7 +104,13 @@ public class InventoryTests
         Assert.True(result.IsSuccess);
         Assert.Equal(0, stockItem.Available);
 
-        var domainEvent = Assert.IsType<StockDepletedEvent>(Assert.Single(stockItem.DomainEvents));
+        var stockChangedEvent = Assert.IsType<StockChangedEvent>(
+            stockItem.DomainEvents.OfType<StockChangedEvent>().Single());
+        Assert.Equal(productId, stockChangedEvent.ProductId);
+        Assert.Equal(0, stockChangedEvent.AvailableQuantity);
+
+        var domainEvent = Assert.IsType<StockDepletedEvent>(
+            stockItem.DomainEvents.OfType<StockDepletedEvent>().Single());
         Assert.Equal(productId, domainEvent.ProductId);
     }
 
@@ -275,6 +284,7 @@ public class InventoryTests
         var productId = Guid.NewGuid();
         var stockItem = CreateStockItem(productId, initialQuantity: 10);
         stockItem.Reserve(4);
+        stockItem.ClearDomainEvents();
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
@@ -292,7 +302,10 @@ public class InventoryTests
         Assert.Equal(0, stockItem.Reserved);
         Assert.Equal(6, stockItem.Available);
         Assert.Contains(productId, repository.UpdatedProductIds);
-        Assert.Empty(outbox.DomainEvents);
+        var stockChangedEvent = Assert.IsType<StockChangedEvent>(
+            Assert.Single(outbox.DomainEvents.OfType<StockChangedEvent>()));
+        Assert.Equal(productId, stockChangedEvent.ProductId);
+        Assert.Equal(6, stockChangedEvent.AvailableQuantity);
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
     }
 
@@ -302,6 +315,7 @@ public class InventoryTests
         var productId = Guid.NewGuid();
         var stockItem = CreateStockItem(productId, initialQuantity: 10);
         stockItem.Reserve(2);
+        stockItem.ClearDomainEvents();
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
@@ -328,6 +342,7 @@ public class InventoryTests
         var productId = Guid.NewGuid();
         var stockItem = CreateStockItem(productId, initialQuantity: 10);
         stockItem.Reserve(4);
+        stockItem.ClearDomainEvents();
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
@@ -345,7 +360,10 @@ public class InventoryTests
         Assert.Equal(0, stockItem.Reserved);
         Assert.Equal(10, stockItem.Available);
         Assert.Contains(productId, repository.UpdatedProductIds);
-        Assert.Empty(outbox.DomainEvents);
+        var stockChangedEvent = Assert.IsType<StockChangedEvent>(
+            Assert.Single(outbox.DomainEvents.OfType<StockChangedEvent>()));
+        Assert.Equal(productId, stockChangedEvent.ProductId);
+        Assert.Equal(10, stockChangedEvent.AvailableQuantity);
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
     }
 
@@ -355,6 +373,7 @@ public class InventoryTests
         var productId = Guid.NewGuid();
         var stockItem = CreateStockItem(productId, initialQuantity: 10);
         stockItem.Reserve(2);
+        stockItem.ClearDomainEvents();
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
@@ -378,8 +397,12 @@ public class InventoryTests
     private static StockItem CreateStockItem(int initialQuantity) =>
         CreateStockItem(Guid.NewGuid(), initialQuantity);
 
-    private static StockItem CreateStockItem(Guid productId, int initialQuantity) =>
-        StockItem.Create(productId, initialQuantity).Value;
+    private static StockItem CreateStockItem(Guid productId, int initialQuantity)
+    {
+        var stockItem = StockItem.Create(productId, initialQuantity).Value;
+        stockItem.ClearDomainEvents();
+        return stockItem;
+    }
 
     private static OrderStockReservationRequestedEvent CreateStockReservationRequestedEvent(Guid productId, int quantity) =>
         new(
