@@ -11,10 +11,16 @@ public class OrderCancelledEventHandler(
     IStockItemRepository repository,
     IInventoryUnitOfWork unitOfWork,
     IInventoryDomainEventOutbox outbox,
+    IInventoryDomainEventInbox inbox,
     ILogger<OrderCancelledEventHandler> logger) : INotificationHandler<OrderCancelledEvent>
 {
+    private const string Consumer = nameof(OrderCancelledEventHandler);
+
     public async Task Handle(OrderCancelledEvent notification, CancellationToken cancellationToken)
     {
+        if (await inbox.HasProcessedAsync(notification.OrderId, Consumer, cancellationToken))
+            return;
+
         var released = new List<StockItem>();
 
         foreach (var item in notification.Items)
@@ -49,6 +55,7 @@ public class OrderCancelledEventHandler(
         foreach (var stockItem in released)
             await outbox.AddAsync(stockItem.DomainEvents, cancellationToken);
 
+        inbox.AddProcessed(notification.OrderId, notification.EventType, Consumer);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         foreach (var stockItem in released)

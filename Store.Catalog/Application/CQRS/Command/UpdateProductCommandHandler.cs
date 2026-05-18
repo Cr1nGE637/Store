@@ -34,8 +34,21 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         if (duplicateName.IsSuccess && duplicateName.Value.ProductId != request.ProductId)
             return Result.Failure<GetProductDto>("Product already exists");
 
+        var duplicateSku = await _productRepository.GetBySkuAsync(request.Sku);
+        if (duplicateSku.IsSuccess && duplicateSku.Value.ProductId != request.ProductId)
+            return Result.Failure<GetProductDto>("Product SKU already exists");
+
         var product = existingResult.Value;
-        var updateResult = product.Update(request.ProductName, request.ProductDescription, request.ProductPrice, request.CategoryId);
+        var updateResult = product.Update(
+            request.Sku,
+            request.ProductName,
+            request.ProductDescription,
+            request.ProductPrice,
+            request.Brand,
+            request.Model,
+            request.WarrantyMonths,
+            request.CategoryId,
+            request.Specifications);
         if (updateResult.IsFailure)
             return Result.Failure<GetProductDto>(updateResult.Error);
         if (!updateResult.Value)

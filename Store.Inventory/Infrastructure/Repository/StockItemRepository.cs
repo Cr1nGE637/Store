@@ -12,7 +12,6 @@ public class StockItemRepository(InventoryDbContext context) : IStockItemReposit
     public async Task<Result<StockItem>> GetByProductIdAsync(Guid productId)
     {
         var entity = await context.StockItems
-            .AsNoTracking()
             .FirstOrDefaultAsync(s => s.ProductId == productId);
 
         if (entity == null)

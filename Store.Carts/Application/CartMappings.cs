@@ -9,6 +9,7 @@ internal static class CartMappings
     internal static GetCartDto ToGetCartDto(Cart cart) => new(
         cart.CartId,
         cart.CustomerId,
+        cart.IsCheckoutPending,
         cart.Items.Select(ToCartItemDto).ToList());
 
     internal static CheckoutResultDto ToCheckoutResultDto(Cart cart, IReadOnlyList<CartItem> items) => new(

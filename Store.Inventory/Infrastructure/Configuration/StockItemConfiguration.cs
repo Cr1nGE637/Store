@@ -12,5 +12,6 @@ public class StockItemConfiguration : IEntityTypeConfiguration<StockItemEntity>
         builder.HasIndex(s => s.ProductId).IsUnique();
         builder.Property(s => s.Quantity).IsRequired();
         builder.Property(s => s.Reserved).IsRequired();
+        builder.Property(s => s.Version).IsRowVersion();
     }
 }

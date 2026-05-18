@@ -107,6 +107,9 @@ namespace Store.Carts.Infrastructure.Migrations
                     b.Property<string>("Error")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("EventType")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -128,11 +131,46 @@ namespace Store.Carts.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EventId");
 
                     b.HasIndex("ProcessedOnUtc", "IsDeadLettered", "NextAttemptOnUtc");
 
                     b.ToTable("domain_event_outbox", "cart");
+                });
+
+            modelBuilder.Entity("Store.EventOutbox.Infrastructure.Entity.ProcessedDomainEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Consumer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("ProcessedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId", "Consumer")
+                        .IsUnique();
+
+                    b.ToTable("processed_domain_events", "cart");
                 });
 
             modelBuilder.Entity("Store.Carts.Infrastructure.Entity.CartItemEntity", b =>

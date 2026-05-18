@@ -82,6 +82,23 @@ public class CartTests
     }
 
     [Fact]
+    public void ReleaseCheckout_WhenCheckoutIsPending_KeepsItemsAndUnlocksCart()
+    {
+        var cart = Cart.Create(Guid.NewGuid()).Value;
+        var productId = Guid.NewGuid();
+        cart.AddItem(productId, "Keyboard", 99.9m, 2);
+        cart.Checkout("customer@example.com");
+
+        var result = cart.ReleaseCheckout();
+
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value);
+        var item = Assert.Single(cart.Items);
+        Assert.Equal(productId, item.ProductId);
+        Assert.False(cart.IsCheckoutPending);
+    }
+
+    [Fact]
     public void Checkout_WhenCartIsEmpty_FailsWithoutDomainEvent()
     {
         var cart = Cart.Create(Guid.NewGuid()).Value;

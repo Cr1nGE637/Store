@@ -35,6 +35,9 @@ namespace Store.Notifications.Infrastructure.Migrations
                     b.Property<string>("Error")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("EventType")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -56,11 +59,46 @@ namespace Store.Notifications.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EventId");
 
                     b.HasIndex("ProcessedOnUtc", "IsDeadLettered", "NextAttemptOnUtc");
 
                     b.ToTable("domain_event_outbox", "notifications");
+                });
+
+            modelBuilder.Entity("Store.EventOutbox.Infrastructure.Entity.ProcessedDomainEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Consumer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("ProcessedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId", "Consumer")
+                        .IsUnique();
+
+                    b.ToTable("processed_domain_events", "notifications");
                 });
 
             modelBuilder.Entity("Store.Notifications.Infrastructure.Entity.OutboxMessageEntity", b =>
@@ -78,6 +116,10 @@ namespace Store.Notifications.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DedupeKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Error")
                         .HasColumnType("text");
@@ -102,6 +144,10 @@ namespace Store.Notifications.Infrastructure.Migrations
                         .HasColumnType("character varying(320)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DedupeKey")
+                        .IsUnique()
+                        .HasFilter("\"DedupeKey\" IS NOT NULL");
 
                     b.HasIndex("ProcessedAt", "IsDeadLettered", "NextAttemptAt");
 

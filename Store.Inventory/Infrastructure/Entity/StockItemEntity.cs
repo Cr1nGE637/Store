@@ -6,4 +6,5 @@ public class StockItemEntity
     public Guid ProductId { get; set; }
     public int Quantity { get; set; }
     public int Reserved { get; set; }
+    public uint Version { get; set; }
 }

@@ -1,9 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Store.Carts.API.Requests;
 using Store.Carts.Application.CQRS.Command;
 using Store.Carts.Application.CQRS.Query;
+using Store.Carts.Application.DTOs;
 
 namespace Store.Carts.API.Controllers;
 
@@ -13,6 +15,9 @@ namespace Store.Carts.API.Controllers;
 public class CartController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(typeof(GetCartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCart(CancellationToken cancellationToken)
     {
         if (!TryGetCustomerId(out var customerId)) return Unauthorized();
@@ -21,6 +26,9 @@ public class CartController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("items")]
+    [ProducesResponseType(typeof(GetCartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> AddItem([FromBody] AddItemRequest request, CancellationToken cancellationToken)
     {
         if (!TryGetCustomerId(out var customerId)) return Unauthorized();
@@ -29,6 +37,9 @@ public class CartController(IMediator mediator) : ControllerBase
     }
 
     [HttpDelete("items/{cartItemId:guid}")]
+    [ProducesResponseType(typeof(GetCartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> RemoveItem(Guid cartItemId, CancellationToken cancellationToken)
     {
         if (!TryGetCustomerId(out var customerId)) return Unauthorized();
@@ -37,6 +48,9 @@ public class CartController(IMediator mediator) : ControllerBase
     }
 
     [HttpPut("items/{cartItemId:guid}/quantity")]
+    [ProducesResponseType(typeof(GetCartDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ChangeQuantity(Guid cartItemId, [FromBody] ChangeQuantityRequest request, CancellationToken cancellationToken)
     {
         if (!TryGetCustomerId(out var customerId)) return Unauthorized();
@@ -45,6 +59,9 @@ public class CartController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("checkout")]
+    [ProducesResponseType(typeof(CheckoutResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Checkout(CancellationToken cancellationToken)
     {
         if (!TryGetCustomerId(out var customerId)) return Unauthorized();

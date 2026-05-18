@@ -25,11 +25,12 @@ public static class InventoryModule
                 }));
 
         services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssembly(typeof(OrderCreatedEventHandler).Assembly));
+            cfg.RegisterServicesFromAssembly(typeof(OrderStockReservationRequestedEventHandler).Assembly));
 
         services.AddScoped<IStockItemRepository, StockItemRepository>();
         services.AddScoped<IInventoryUnitOfWork, UnitOfWork>();
         services.AddScoped<IInventoryDomainEventOutbox, InventoryDomainEventOutbox>();
+        services.AddScoped<IInventoryDomainEventInbox, InventoryDomainEventInbox>();
         services.AddHostedService<DomainEventOutboxProcessor<InventoryDbContext>>();
 
         return services;

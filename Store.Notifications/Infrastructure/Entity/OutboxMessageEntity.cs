@@ -6,6 +6,7 @@ public class OutboxMessageEntity
     public string To { get; private set; } = string.Empty;
     public string Subject { get; private set; } = string.Empty;
     public string Body { get; private set; } = string.Empty;
+    public string? DedupeKey { get; private set; }
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
     public DateTime? ProcessedAt { get; private set; }
     public string? Error { get; private set; }
@@ -17,8 +18,8 @@ public class OutboxMessageEntity
 
     private OutboxMessageEntity() { }
 
-    public static OutboxMessageEntity Create(string to, string subject, string body) =>
-        new() { To = to, Subject = subject, Body = body };
+    public static OutboxMessageEntity Create(string to, string subject, string body, string? dedupeKey) =>
+        new() { To = to, Subject = subject, Body = body, DedupeKey = dedupeKey };
 
     public void MarkAsProcessed()
     {

@@ -1,8 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Store.Ordering.Application.CQRS.Command;
 using Store.Ordering.Application.CQRS.Query;
+using Store.Ordering.Application.DTOs;
 
 namespace Store.Ordering.API.Controllers;
 
@@ -12,6 +14,10 @@ namespace Store.Ordering.API.Controllers;
 public class OrdersController(IMediator mediator) : ControllerBase
 {
     [HttpGet("{orderId:guid}")]
+    [ProducesResponseType(typeof(GetOrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetById(Guid orderId)
     {
         if (!TryGetRequesterId(out var requesterId)) return Unauthorized();
@@ -22,6 +28,9 @@ public class OrdersController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("my")]
+    [ProducesResponseType(typeof(IReadOnlyList<GetOrderDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMy([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         if (!TryGetRequesterId(out var customerId)) return Unauthorized();
@@ -31,6 +40,10 @@ public class OrdersController(IMediator mediator) : ControllerBase
 
     [HttpPost("{orderId:guid}/pay")]
     [Authorize(Roles = "Manager")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Pay(Guid orderId)
     {
         var result = await mediator.Send(new MarkOrderPaidCommand(orderId));
@@ -39,6 +52,10 @@ public class OrdersController(IMediator mediator) : ControllerBase
 
     [HttpPost("{orderId:guid}/cancel")]
     [Authorize(Roles = "Customer")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Cancel(Guid orderId)
     {
         if (!TryGetRequesterId(out var requesterId)) return Unauthorized();

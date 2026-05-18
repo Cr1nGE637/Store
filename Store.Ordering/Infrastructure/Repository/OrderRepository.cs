@@ -24,6 +24,19 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
         return Result.Success(MapToDomain(entity));
     }
 
+    public async Task<Result<Order>> GetBySourceCheckoutIdAsync(Guid sourceCheckoutId)
+    {
+        var entity = await context.Orders
+            .AsNoTracking()
+            .Include(o => o.Products)
+            .FirstOrDefaultAsync(o => o.SourceCheckoutId == sourceCheckoutId);
+
+        if (entity == null)
+            return Result.Failure<Order>("Order not found");
+
+        return Result.Success(MapToDomain(entity));
+    }
+
     public async Task<IReadOnlyList<Order>> GetByCustomerIdAsync(Guid customerId)
     {
         var entities = await context.Orders
@@ -65,14 +78,16 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
         entity.Status = order.Status;
         entity.PaidAt = order.PaidAt;
         entity.CancelledAt = order.CancelledAt;
+        entity.RejectedAt = order.RejectedAt;
+        entity.RejectionReason = order.RejectionReason;
         return Result.Success();
     }
 
     private static Order MapToDomain(OrderEntity entity)
     {
         var order = Order.Reconstitute(
-            entity.OrderId, entity.CustomerId, entity.CustomerEmail, entity.Status,
-            entity.CreatedAt, entity.PaidAt, entity.CancelledAt);
+            entity.OrderId, entity.SourceCheckoutId, entity.CustomerId, entity.CustomerEmail, entity.Status,
+            entity.CreatedAt, entity.PaidAt, entity.CancelledAt, entity.RejectedAt, entity.RejectionReason);
         var products = entity.Products.Select(p =>
         {
             var result = OrderedProduct.Create(p.ProductId, p.ProductName, p.Price, p.Quantity);
@@ -88,12 +103,15 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
     private static OrderEntity MapToEntity(Order order) => new()
     {
         OrderId = order.OrderId,
+        SourceCheckoutId = order.SourceCheckoutId,
         CustomerId = order.CustomerId,
         CustomerEmail = order.CustomerEmail,
         Status = order.Status,
         CreatedAt = order.CreatedAt,
         PaidAt = order.PaidAt,
         CancelledAt = order.CancelledAt,
+        RejectedAt = order.RejectedAt,
+        RejectionReason = order.RejectionReason,
         Products = order.Products.Select(p => new OrderedProductEntity
         {
             OrderedProductId = CreateOrderedProductId(order.OrderId, p.ProductId),

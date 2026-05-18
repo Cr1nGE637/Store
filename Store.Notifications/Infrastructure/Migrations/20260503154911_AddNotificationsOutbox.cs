@@ -11,8 +11,12 @@ namespace Store.Notifications.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "notifications");
+
             migrationBuilder.CreateTable(
                 name: "outbox_messages",
+                schema: "notifications",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -30,6 +34,7 @@ namespace Store.Notifications.Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_outbox_messages_ProcessedAt",
+                schema: "notifications",
                 table: "outbox_messages",
                 column: "ProcessedAt");
         }
@@ -38,7 +43,8 @@ namespace Store.Notifications.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "outbox_messages");
+                name: "outbox_messages",
+                schema: "notifications");
         }
     }
 }

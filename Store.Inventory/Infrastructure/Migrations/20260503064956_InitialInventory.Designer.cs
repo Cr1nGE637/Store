@@ -21,7 +21,8 @@ namespace Store.Inventory.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.1")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasDefaultSchema("inventory");
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -45,7 +46,7 @@ namespace Store.Inventory.Infrastructure.Migrations
                     b.HasIndex("ProductId")
                         .IsUnique();
 
-                    b.ToTable("StockItems");
+                    b.ToTable("StockItems", "inventory");
                 });
 #pragma warning restore 612, 618
         }

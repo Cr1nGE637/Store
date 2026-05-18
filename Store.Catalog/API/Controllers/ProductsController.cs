@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Store.Catalog.Application.CQRS.Command;
 using Store.Catalog.Application.CQRS.Query;
@@ -21,6 +22,10 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = "Manager")]
     [HttpPost]
+    [ProducesResponseType(typeof(CreateProductDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<CreateProductDto>> CreateProduct([FromBody] CreateProductCommand command, CancellationToken token)
     {
         var result = await _mediator.Send(command, token);
@@ -31,6 +36,8 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(List<GetProductDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<GetProductDto>>> GetAllProducts([FromQuery] GetProductsQuery query)
     {
         var result = await _mediator.Send(query);
@@ -41,6 +48,8 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(GetProductDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetProductDto>> GetProductById(Guid id, CancellationToken token)
     {
         var result = await _mediator.Send(new GetProductByIdQuery(id), token);
@@ -51,6 +60,8 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("category/{categoryId:guid}")]
+    [ProducesResponseType(typeof(List<GetProductDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<List<GetProductDto>>> GetProductsByCategory(
         Guid categoryId,
         CancellationToken token,
@@ -66,15 +77,24 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = "Manager")]
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(GetProductDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<GetProductDto>> UpdateProduct(Guid id, [FromBody] UpdateProductCommand command, CancellationToken token)
     {
         var commandWithId = new UpdateProductCommand
         {
             ProductId = id,
+            Sku = command.Sku,
             ProductName = command.ProductName,
             ProductDescription = command.ProductDescription,
             ProductPrice = command.ProductPrice,
-            CategoryId = command.CategoryId
+            Brand = command.Brand,
+            Model = command.Model,
+            WarrantyMonths = command.WarrantyMonths,
+            CategoryId = command.CategoryId,
+            Specifications = command.Specifications
         };
         var result = await _mediator.Send(commandWithId, token);
         if (result.IsFailure)
@@ -85,6 +105,10 @@ public class ProductsController : ControllerBase
 
     [Authorize(Roles = "Manager")]
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(typeof(GetProductDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<GetProductDto>> DeleteProduct(Guid id, CancellationToken token)
     {
         var result = await _mediator.Send(new DeleteProductCommand { ProductId = id }, token);

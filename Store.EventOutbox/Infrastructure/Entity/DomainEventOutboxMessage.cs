@@ -9,7 +9,9 @@ public class DomainEventOutboxMessage
     private DomainEventOutboxMessage() { }
 
     public Guid Id { get; private set; }
+    public Guid EventId { get; private set; }
     public string EventType { get; private set; } = string.Empty;
+    public int Version { get; private set; }
     public string Payload { get; private set; } = string.Empty;
     public DateTime OccurredOnUtc { get; private set; }
     public DateTime? ProcessedOnUtc { get; private set; }
@@ -25,9 +27,11 @@ public class DomainEventOutboxMessage
         return new DomainEventOutboxMessage
         {
             Id = Guid.NewGuid(),
+            EventId = domainEvent.EventId,
             EventType = eventType,
+            Version = domainEvent.Version,
             Payload = payload,
-            OccurredOnUtc = DateTime.UtcNow
+            OccurredOnUtc = domainEvent.OccurredOnUtc
         };
     }
 

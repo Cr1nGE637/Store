@@ -67,6 +67,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
     HttpOnly = HttpOnlyPolicy.Always
 });
 
+app.UseStoreRequestLogging();
 app.UseRateLimiter();
 app.UseCors(ApiExtensions.CorsPolicyName);
 app.UseAuthentication();

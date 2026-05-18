@@ -8,13 +8,21 @@ namespace Store.Notifications.Application.EventHandlers;
 public class OrderCancelledNotificationHandler(
     INotificationOutbox outbox,
     INotificationsUnitOfWork unitOfWork,
+    INotificationsDomainEventInbox inbox,
     ILogger<OrderCancelledNotificationHandler> logger) : INotificationHandler<OrderCancelledEvent>
 {
+    private const string Consumer = nameof(OrderCancelledNotificationHandler);
+
     public async Task Handle(OrderCancelledEvent notification, CancellationToken cancellationToken)
     {
+        if (await inbox.HasProcessedAsync(notification.EventId, Consumer, cancellationToken))
+            return;
+
         if (string.IsNullOrEmpty(notification.CustomerEmail))
         {
             logger.LogWarning("OrderCancelled: no customer email for order {OrderId}, skipping notification", notification.OrderId);
+            inbox.AddProcessed(notification, Consumer);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 
@@ -28,16 +36,23 @@ public class OrderCancelledNotificationHandler(
                 If you did not request this cancellation, please contact support.
                 """;
 
-            outbox.Enqueue(
+            await outbox.EnqueueAsync(
                 notification.CustomerEmail,
                 $"Order #{notification.OrderId} cancelled",
-                body);
+                body,
+                BuildDedupeKey(notification),
+                cancellationToken);
 
+            inbox.AddProcessed(notification, Consumer);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to enqueue notification for order {OrderId}", notification.OrderId);
+            throw;
         }
     }
+
+    private static string BuildDedupeKey(OrderCancelledEvent notification) =>
+        $"{notification.EventId}:{Consumer}";
 }

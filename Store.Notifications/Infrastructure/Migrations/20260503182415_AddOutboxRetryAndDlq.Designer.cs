@@ -21,7 +21,8 @@ namespace Store.Notifications.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.1")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasDefaultSchema("notifications");
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -67,7 +68,7 @@ namespace Store.Notifications.Infrastructure.Migrations
 
                     b.HasIndex("ProcessedAt", "IsDeadLettered", "NextAttemptAt");
 
-                    b.ToTable("outbox_messages", (string)null);
+                    b.ToTable("outbox_messages", "notifications");
                 });
 #pragma warning restore 612, 618
         }

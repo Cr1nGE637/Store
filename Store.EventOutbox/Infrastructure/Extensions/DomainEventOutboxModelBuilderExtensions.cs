@@ -13,9 +13,15 @@ public static class DomainEventOutboxModelBuilderExtensions
 
             builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.EventId)
+                .IsRequired();
+
             builder.Property(x => x.EventType)
                 .IsRequired()
                 .HasMaxLength(1000);
+
+            builder.Property(x => x.Version)
+                .IsRequired();
 
             builder.Property(x => x.Payload)
                 .IsRequired();
@@ -30,6 +36,31 @@ public static class DomainEventOutboxModelBuilderExtensions
                 .IsRequired();
 
             builder.HasIndex(x => new { x.ProcessedOnUtc, x.IsDeadLettered, x.NextAttemptOnUtc });
+            builder.HasIndex(x => x.EventId);
+        });
+
+        modelBuilder.Entity<ProcessedDomainEvent>(builder =>
+        {
+            builder.ToTable("processed_domain_events");
+
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.EventId)
+                .IsRequired();
+
+            builder.Property(x => x.EventType)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            builder.Property(x => x.Consumer)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            builder.Property(x => x.ProcessedOnUtc)
+                .IsRequired();
+
+            builder.HasIndex(x => new { x.EventId, x.Consumer })
+                .IsUnique();
         });
 
         return modelBuilder;

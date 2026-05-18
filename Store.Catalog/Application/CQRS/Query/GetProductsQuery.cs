@@ -8,4 +8,10 @@ public class GetProductsQuery : IRequest<Result<List<GetProductDto>>>
 {
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 50;
+    public string? Search { get; init; }
+    public Guid? CategoryId { get; init; }
+    public string? Brand { get; init; }
+    public decimal? MinPrice { get; init; }
+    public decimal? MaxPrice { get; init; }
+    public Dictionary<string, string> SpecificationFilters { get; init; } = [];
 }

@@ -104,4 +104,13 @@ public class Cart : AggregateRoot
         IsCheckoutPending = false;
         return Result.Success(true);
     }
+
+    public Result<bool> ReleaseCheckout()
+    {
+        if (!IsCheckoutPending)
+            return Result.Success(false);
+
+        IsCheckoutPending = false;
+        return Result.Success(true);
+    }
 }

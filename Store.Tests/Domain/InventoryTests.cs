@@ -177,49 +177,95 @@ public class InventoryTests
     }
 
     [Fact]
-    public async Task OrderCreatedHandler_ReservesTrackedItemsPersistsEventsAndClearsDomainEvents()
+    public async Task StockReservationRequestedHandler_WhenAllItemsAvailable_ReservesEverythingAndPublishesSuccess()
     {
         var productId = Guid.NewGuid();
         var stockItem = CreateStockItem(productId, initialQuantity: 2);
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
-        var handler = new OrderCreatedEventHandler(
+        var inbox = new FakeInventoryDomainEventInbox();
+        var handler = new OrderStockReservationRequestedEventHandler(
             repository,
             unitOfWork,
             outbox,
-            NullLogger<OrderCreatedEventHandler>.Instance);
+            inbox,
+            NullLogger<OrderStockReservationRequestedEventHandler>.Instance);
 
-        await handler.Handle(CreateOrderCreatedEvent(productId, quantity: 2), CancellationToken.None);
+        var notification = CreateStockReservationRequestedEvent(productId, quantity: 2);
+        await handler.Handle(notification, CancellationToken.None);
 
         Assert.Equal(2, stockItem.Quantity);
         Assert.Equal(2, stockItem.Reserved);
         Assert.Equal(0, stockItem.Available);
         Assert.Contains(productId, repository.UpdatedProductIds);
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
+        Assert.Contains(notification.EventId, inbox.ProcessedEventIds);
 
-        var domainEvent = Assert.IsType<StockDepletedEvent>(Assert.Single(outbox.DomainEvents));
+        var domainEvent = Assert.IsType<StockDepletedEvent>(outbox.DomainEvents.OfType<StockDepletedEvent>().Single());
         Assert.Equal(productId, domainEvent.ProductId);
+        var successEvent = Assert.IsType<OrderStockReservedEvent>(outbox.DomainEvents.OfType<OrderStockReservedEvent>().Single());
+        Assert.Equal(notification.OrderId, successEvent.OrderId);
         Assert.Empty(stockItem.DomainEvents);
     }
 
     [Fact]
-    public async Task OrderCreatedHandler_WhenStockIsMissing_SkipsReservationButStillSaves()
+    public async Task StockReservationRequestedHandler_WhenStockIsMissing_RejectsWithoutPartialReservation()
     {
         var productId = Guid.NewGuid();
         var repository = new FakeStockItemRepository();
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
-        var handler = new OrderCreatedEventHandler(
+        var inbox = new FakeInventoryDomainEventInbox();
+        var handler = new OrderStockReservationRequestedEventHandler(
             repository,
             unitOfWork,
             outbox,
-            NullLogger<OrderCreatedEventHandler>.Instance);
+            inbox,
+            NullLogger<OrderStockReservationRequestedEventHandler>.Instance);
 
-        await handler.Handle(CreateOrderCreatedEvent(productId, quantity: 2), CancellationToken.None);
+        await handler.Handle(CreateStockReservationRequestedEvent(productId, quantity: 2), CancellationToken.None);
 
         Assert.Empty(repository.UpdatedProductIds);
-        Assert.Empty(outbox.DomainEvents);
+        var rejectedEvent = Assert.IsType<OrderStockReservationRejectedEvent>(
+            Assert.Single(outbox.DomainEvents));
+        Assert.Contains("Stock item not found", rejectedEvent.Reason);
+        Assert.Equal(1, unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task StockReservationRequestedHandler_WhenOneItemIsShort_RejectsWithoutSavingPartialReservation()
+    {
+        var availableProductId = Guid.NewGuid();
+        var shortProductId = Guid.NewGuid();
+        var availableStock = CreateStockItem(availableProductId, initialQuantity: 10);
+        var shortStock = CreateStockItem(shortProductId, initialQuantity: 1);
+        var repository = new FakeStockItemRepository(availableStock, shortStock);
+        var unitOfWork = new FakeInventoryUnitOfWork();
+        var outbox = new FakeInventoryDomainEventOutbox();
+        var inbox = new FakeInventoryDomainEventInbox();
+        var handler = new OrderStockReservationRequestedEventHandler(
+            repository,
+            unitOfWork,
+            outbox,
+            inbox,
+            NullLogger<OrderStockReservationRequestedEventHandler>.Instance);
+
+        var notification = new OrderStockReservationRequestedEvent(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "customer@example.com",
+            [
+                new OrderItem(availableProductId, "Keyboard", 99.9m, 2),
+                new OrderItem(shortProductId, "Mouse", 49.9m, 2)
+            ]);
+
+        await handler.Handle(notification, CancellationToken.None);
+
+        Assert.Equal(0, availableStock.Reserved);
+        Assert.Equal(0, shortStock.Reserved);
+        Assert.Empty(repository.UpdatedProductIds);
+        Assert.IsType<OrderStockReservationRejectedEvent>(Assert.Single(outbox.DomainEvents));
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
     }
 
@@ -232,10 +278,12 @@ public class InventoryTests
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
+        var inbox = new FakeInventoryDomainEventInbox();
         var handler = new OrderPaidEventHandler(
             repository,
             unitOfWork,
             outbox,
+            inbox,
             NullLogger<OrderPaidEventHandler>.Instance);
 
         await handler.Handle(CreateOrderPaidEvent(productId, quantity: 4), CancellationToken.None);
@@ -257,10 +305,12 @@ public class InventoryTests
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
+        var inbox = new FakeInventoryDomainEventInbox();
         var handler = new OrderPaidEventHandler(
             repository,
             unitOfWork,
             outbox,
+            inbox,
             NullLogger<OrderPaidEventHandler>.Instance);
 
         await handler.Handle(CreateOrderPaidEvent(productId, quantity: 3), CancellationToken.None);
@@ -281,10 +331,12 @@ public class InventoryTests
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
+        var inbox = new FakeInventoryDomainEventInbox();
         var handler = new OrderCancelledEventHandler(
             repository,
             unitOfWork,
             outbox,
+            inbox,
             NullLogger<OrderCancelledEventHandler>.Instance);
 
         await handler.Handle(CreateOrderCancelledEvent(productId, quantity: 4), CancellationToken.None);
@@ -306,10 +358,12 @@ public class InventoryTests
         var repository = new FakeStockItemRepository(stockItem);
         var unitOfWork = new FakeInventoryUnitOfWork();
         var outbox = new FakeInventoryDomainEventOutbox();
+        var inbox = new FakeInventoryDomainEventInbox();
         var handler = new OrderCancelledEventHandler(
             repository,
             unitOfWork,
             outbox,
+            inbox,
             NullLogger<OrderCancelledEventHandler>.Instance);
 
         await handler.Handle(CreateOrderCancelledEvent(productId, quantity: 3), CancellationToken.None);
@@ -327,7 +381,7 @@ public class InventoryTests
     private static StockItem CreateStockItem(Guid productId, int initialQuantity) =>
         StockItem.Create(productId, initialQuantity).Value;
 
-    private static OrderCreatedEvent CreateOrderCreatedEvent(Guid productId, int quantity) =>
+    private static OrderStockReservationRequestedEvent CreateStockReservationRequestedEvent(Guid productId, int quantity) =>
         new(
             Guid.NewGuid(),
             Guid.NewGuid(),
@@ -392,6 +446,24 @@ public class InventoryTests
         {
             DomainEvents.AddRange(domainEvents);
             return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeInventoryDomainEventInbox : IInventoryDomainEventInbox
+    {
+        public List<Guid> ProcessedEventIds { get; } = [];
+
+        public Task<bool> HasProcessedAsync(Guid eventId, string consumer, CancellationToken cancellationToken) =>
+            Task.FromResult(ProcessedEventIds.Contains(eventId));
+
+        public void AddProcessed(IDomainEvent domainEvent, string consumer)
+        {
+            ProcessedEventIds.Add(domainEvent.EventId);
+        }
+
+        public void AddProcessed(Guid eventId, string eventType, string consumer)
+        {
+            ProcessedEventIds.Add(eventId);
         }
     }
 }

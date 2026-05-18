@@ -28,6 +28,7 @@ public static class NotificationsModule
         services.AddScoped<INotificationSender, EmailNotificationSender>();
         services.AddScoped<INotificationOutbox, NotificationOutbox>();
         services.AddScoped<INotificationsUnitOfWork, UnitOfWork>();
+        services.AddScoped<INotificationsDomainEventInbox, NotificationsDomainEventInbox>();
 
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(OrderCreatedNotificationHandler).Assembly));

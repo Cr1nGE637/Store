@@ -30,6 +30,7 @@ public static class OrderingModule
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderingUnitOfWork, UnitOfWork>();
         services.AddScoped<IOrderingDomainEventOutbox, OrderingDomainEventOutbox>();
+        services.AddScoped<IOrderingDomainEventInbox, OrderingDomainEventInbox>();
         services.AddHostedService<DomainEventOutboxProcessor<OrderingDbContext>>();
 
         return services;

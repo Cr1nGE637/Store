@@ -25,6 +25,8 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("register")]
+    [ProducesResponseType(typeof(RegisterDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RegisterDto>> Register([FromBody] RegisterCommand command, CancellationToken token)
     {
         var result = await _mediator.Send(command, token);
@@ -36,6 +38,9 @@ public class UsersController : ControllerBase
 
     [HttpPost("login")]
     [EnableRateLimiting("login")]
+    [ProducesResponseType(typeof(LoginDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult<LoginDto>> Login([FromBody] LoginCommand command, CancellationToken token)
     {
         var result = await _mediator.Send(command, token);
@@ -56,6 +61,8 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult Logout()
     {
         Response.Cookies.Delete(AuthCookieDefaults.Name, new CookieOptions
@@ -70,6 +77,10 @@ public class UsersController : ControllerBase
     
     [Authorize(Roles = "Manager")]
     [HttpGet]
+    [ProducesResponseType(typeof(GetUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<GetUserDto>> GetUserByEmail([FromQuery] GetUserQuery query)
     {
         var result = await _mediator.Send(query);

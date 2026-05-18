@@ -6,8 +6,13 @@ namespace Store.Catalog.Application.CQRS.Command;
 
 public class CreateProductCommand : IRequest<Result<CreateProductDto>>
 {
+    public string Sku { get; init; } = string.Empty;
     public string ProductName { get; init; } = string.Empty;
     public string ProductDescription { get; init; } = string.Empty;
     public decimal ProductPrice { get; init; }
+    public string Brand { get; init; } = string.Empty;
+    public string Model { get; init; } = string.Empty;
+    public int WarrantyMonths { get; init; }
     public Guid CategoryId { get; init; }
+    public Dictionary<string, string> Specifications { get; init; } = [];
 }

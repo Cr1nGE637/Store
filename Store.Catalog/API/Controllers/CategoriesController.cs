@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Store.Catalog.Application.CQRS.Command;
 using Store.Catalog.Application.CQRS.Query;
@@ -20,6 +21,10 @@ public class CategoriesController : ControllerBase
 
     [Authorize(Roles = "Manager")]
     [HttpPost]
+    [ProducesResponseType(typeof(CreateCategoryDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<CreateCategoryDto>> CreateCategory([FromBody] CreateCategoryCommand command, CancellationToken token)
     {
         var result = await _mediator.Send(command, token);
@@ -30,6 +35,8 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(List<GetCategoryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<GetCategoryDto>>> GetAllCategories([FromQuery] GetCategoriesQuery query)
     {
         var result = await _mediator.Send(query);
@@ -40,6 +47,8 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(GetCategoryDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetCategoryDto>> GetCategoryById(Guid id, CancellationToken token)
     {
         var result = await _mediator.Send(new GetCategoryByIdQuery(id), token);
@@ -51,6 +60,10 @@ public class CategoriesController : ControllerBase
 
     [Authorize(Roles = "Manager")]
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(GetCategoryDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<GetCategoryDto>> UpdateCategory(Guid id, [FromBody] UpdateCategoryCommand command, CancellationToken token)
     {
         var commandWithId = new UpdateCategoryCommand { CategoryId = id, CategoryName = command.CategoryName };
@@ -63,6 +76,10 @@ public class CategoriesController : ControllerBase
 
     [Authorize(Roles = "Manager")]
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(typeof(GetCategoryDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<GetCategoryDto>> DeleteCategory(Guid id, CancellationToken token)
     {
         var result = await _mediator.Send(new DeleteCategoryCommand { CategoryId = id }, token);

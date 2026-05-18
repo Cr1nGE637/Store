@@ -11,10 +11,16 @@ public class OrderPaidEventHandler(
     IStockItemRepository repository,
     IInventoryUnitOfWork unitOfWork,
     IInventoryDomainEventOutbox outbox,
+    IInventoryDomainEventInbox inbox,
     ILogger<OrderPaidEventHandler> logger) : INotificationHandler<OrderPaidEvent>
 {
+    private const string Consumer = nameof(OrderPaidEventHandler);
+
     public async Task Handle(OrderPaidEvent notification, CancellationToken cancellationToken)
     {
+        if (await inbox.HasProcessedAsync(notification.OrderId, Consumer, cancellationToken))
+            return;
+
         var deducted = new List<StockItem>();
 
         foreach (var item in notification.Items)
@@ -49,6 +55,7 @@ public class OrderPaidEventHandler(
         foreach (var stockItem in deducted)
             await outbox.AddAsync(stockItem.DomainEvents, cancellationToken);
 
+        inbox.AddProcessed(notification.OrderId, notification.EventType, Consumer);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         foreach (var stockItem in deducted)

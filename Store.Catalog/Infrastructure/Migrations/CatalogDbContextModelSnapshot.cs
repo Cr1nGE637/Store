@@ -48,6 +48,16 @@ namespace Store.Catalog.Infrastructure.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("ProductDescription")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -61,11 +71,47 @@ namespace Store.Catalog.Infrastructure.Migrations
                     b.Property<decimal>("ProductPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("WarrantyMonths")
+                        .HasColumnType("integer");
+
                     b.HasKey("ProductId");
+
+                    b.HasIndex("Brand");
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("ProductPrice");
+
+                    b.HasIndex("Sku")
+                        .IsUnique();
+
                     b.ToTable("Products", "catalog");
+                });
+
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductSpecificationEntity", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.HasKey("ProductId", "Name");
+
+                    b.HasIndex("Name", "Value");
+
+                    b.ToTable("ProductSpecifications", "catalog");
                 });
 
             modelBuilder.Entity("Store.EventOutbox.Infrastructure.Entity.DomainEventOutboxMessage", b =>
@@ -79,6 +125,9 @@ namespace Store.Catalog.Infrastructure.Migrations
 
                     b.Property<string>("Error")
                         .HasColumnType("text");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("EventType")
                         .IsRequired()
@@ -101,11 +150,46 @@ namespace Store.Catalog.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EventId");
 
                     b.HasIndex("ProcessedOnUtc", "IsDeadLettered", "NextAttemptOnUtc");
 
                     b.ToTable("domain_event_outbox", "catalog");
+                });
+
+            modelBuilder.Entity("Store.EventOutbox.Infrastructure.Entity.ProcessedDomainEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Consumer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("ProcessedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId", "Consumer")
+                        .IsUnique();
+
+                    b.ToTable("processed_domain_events", "catalog");
                 });
 
             modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductEntity", b =>
@@ -115,6 +199,22 @@ namespace Store.Catalog.Infrastructure.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductSpecificationEntity", b =>
+                {
+                    b.HasOne("Store.Catalog.Infrastructure.Entity.ProductEntity", "Product")
+                        .WithMany("Specifications")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductEntity", b =>
+                {
+                    b.Navigation("Specifications");
                 });
 #pragma warning restore 612, 618
         }

@@ -21,7 +21,20 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<
         if (pagination.IsFailure)
             return Result.Failure<List<GetProductDto>>(pagination.Error);
 
-        var result = await _productRepository.GetPageAsync(pagination.Value.Skip, pagination.Value.Take);
+        if (request.MinPrice.HasValue && request.MaxPrice.HasValue && request.MinPrice > request.MaxPrice)
+            return Result.Failure<List<GetProductDto>>("Minimum price cannot be greater than maximum price");
+
+        var criteria = new ProductSearchCriteria(
+            request.Search,
+            request.CategoryId,
+            request.Brand,
+            request.MinPrice,
+            request.MaxPrice,
+            request.SpecificationFilters,
+            pagination.Value.Skip,
+            pagination.Value.Take);
+
+        var result = await _productRepository.SearchAsync(criteria);
         if (result.IsFailure)
             return Result.Failure<List<GetProductDto>>(result.Error);
 

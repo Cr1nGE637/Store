@@ -8,13 +8,21 @@ namespace Store.Notifications.Application.EventHandlers;
 public class OrderCreatedNotificationHandler(
     INotificationOutbox outbox,
     INotificationsUnitOfWork unitOfWork,
+    INotificationsDomainEventInbox inbox,
     ILogger<OrderCreatedNotificationHandler> logger) : INotificationHandler<OrderCreatedEvent>
 {
+    private const string Consumer = nameof(OrderCreatedNotificationHandler);
+
     public async Task Handle(OrderCreatedEvent notification, CancellationToken cancellationToken)
     {
+        if (await inbox.HasProcessedAsync(notification.EventId, Consumer, cancellationToken))
+            return;
+
         if (string.IsNullOrEmpty(notification.CustomerEmail))
         {
             logger.LogWarning("OrderCreated: no customer email for order {OrderId}, skipping notification", notification.OrderId);
+            inbox.AddProcessed(notification, Consumer);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return;
         }
 
@@ -35,16 +43,23 @@ public class OrderCreatedNotificationHandler(
                 Thank you for shopping with us!
                 """;
 
-            outbox.Enqueue(
+            await outbox.EnqueueAsync(
                 notification.CustomerEmail,
                 $"Order #{notification.OrderId} placed",
-                body);
+                body,
+                BuildDedupeKey(notification),
+                cancellationToken);
 
+            inbox.AddProcessed(notification, Consumer);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to enqueue notification for order {OrderId}", notification.OrderId);
+            throw;
         }
     }
+
+    private static string BuildDedupeKey(OrderCreatedEvent notification) =>
+        $"{notification.EventId}:{Consumer}";
 }

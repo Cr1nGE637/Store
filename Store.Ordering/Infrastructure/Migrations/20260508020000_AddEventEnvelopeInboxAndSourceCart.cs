@@ -1,0 +1,108 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Store.Ordering.Infrastructure.DbContexts;
+
+#nullable disable
+
+namespace Store.Ordering.Infrastructure.Migrations
+{
+    [DbContext(typeof(OrderingDbContext))]
+    [Migration("20260508020000_AddEventEnvelopeInboxAndSourceCart")]
+    public partial class AddEventEnvelopeInboxAndSourceCart : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<Guid>(
+                name: "SourceCartId",
+                schema: "ordering",
+                table: "Orders",
+                type: "uuid",
+                nullable: true);
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "EventId",
+                schema: "ordering",
+                table: "domain_event_outbox",
+                type: "uuid",
+                nullable: false,
+                defaultValue: Guid.Empty);
+
+            migrationBuilder.AddColumn<int>(
+                name: "Version",
+                schema: "ordering",
+                table: "domain_event_outbox",
+                type: "integer",
+                nullable: false,
+                defaultValue: 1);
+
+            migrationBuilder.CreateTable(
+                name: "processed_domain_events",
+                schema: "ordering",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EventType = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    Consumer = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    ProcessedOnUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_processed_domain_events", x => x.Id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_SourceCartId",
+                schema: "ordering",
+                table: "Orders",
+                column: "SourceCartId",
+                unique: true,
+                filter: "\"SourceCartId\" IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_domain_event_outbox_EventId",
+                schema: "ordering",
+                table: "domain_event_outbox",
+                column: "EventId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_processed_domain_events_EventId_Consumer",
+                schema: "ordering",
+                table: "processed_domain_events",
+                columns: new[] { "EventId", "Consumer" },
+                unique: true);
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "processed_domain_events",
+                schema: "ordering");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Orders_SourceCartId",
+                schema: "ordering",
+                table: "Orders");
+
+            migrationBuilder.DropIndex(
+                name: "IX_domain_event_outbox_EventId",
+                schema: "ordering",
+                table: "domain_event_outbox");
+
+            migrationBuilder.DropColumn(
+                name: "SourceCartId",
+                schema: "ordering",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "EventId",
+                schema: "ordering",
+                table: "domain_event_outbox");
+
+            migrationBuilder.DropColumn(
+                name: "Version",
+                schema: "ordering",
+                table: "domain_event_outbox");
+        }
+    }
+}

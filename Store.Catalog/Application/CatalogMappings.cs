@@ -6,10 +6,30 @@ namespace Store.Catalog.Application;
 internal static class CatalogMappings
 {
     internal static GetProductDto ToGetProductDto(Product p) =>
-        new(p.ProductId, p.ProductName, p.ProductDescription, p.ProductPrice, p.CategoryId);
+        new(
+            p.ProductId,
+            p.Sku.Value,
+            p.ProductName,
+            p.ProductDescription,
+            p.ProductPrice,
+            p.Brand,
+            p.Model,
+            p.WarrantyMonths,
+            p.CategoryId,
+            p.Specifications.ToDictionary(s => s.Name, s => s.Value));
 
     internal static CreateProductDto ToCreateProductDto(Product p) =>
-        new(p.ProductId, p.ProductName, p.ProductDescription, p.ProductPrice, p.CategoryId);
+        new(
+            p.ProductId,
+            p.Sku.Value,
+            p.ProductName,
+            p.ProductDescription,
+            p.ProductPrice,
+            p.Brand,
+            p.Model,
+            p.WarrantyMonths,
+            p.CategoryId,
+            p.Specifications.ToDictionary(s => s.Name, s => s.Value));
 
     internal static GetCategoryDto ToGetCategoryDto(Category c) => new(c.CategoryId, c.CategoryName);
 

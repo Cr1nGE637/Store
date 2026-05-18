@@ -8,7 +8,7 @@ namespace Store.Tests.Domain;
 public class OrderTests
 {
     [Fact]
-    public void Create_WithProducts_CreatesUnpaidOrderAndRaisesCreatedEvent()
+    public void Create_WithProducts_CreatesAwaitingStockOrderAndRaisesReservationRequest()
     {
         var customerId = Guid.NewGuid();
         var product = CreateProduct();
@@ -19,14 +19,44 @@ public class OrderTests
         var order = result.Value;
         Assert.Equal(customerId, order.CustomerId);
         Assert.Equal("customer@example.com", order.CustomerEmail);
-        Assert.Equal(OrderStatus.Unpaid, order.Status);
+        Assert.Equal(OrderStatus.AwaitingStock, order.Status);
         Assert.Single(order.Products);
 
-        var domainEvent = Assert.IsType<OrderCreatedEvent>(Assert.Single(order.DomainEvents));
+        var domainEvent = Assert.IsType<OrderStockReservationRequestedEvent>(Assert.Single(order.DomainEvents));
         Assert.Equal(order.OrderId, domainEvent.OrderId);
         Assert.Equal(customerId, domainEvent.CustomerId);
         Assert.Equal("customer@example.com", domainEvent.CustomerEmail);
         Assert.Single(domainEvent.Items);
+    }
+
+    [Fact]
+    public void ConfirmStockReserved_WhenAwaitingStock_MarksUnpaidAndRaisesCreatedEvent()
+    {
+        var order = Order.Create(Guid.NewGuid(), "customer@example.com", [CreateProduct()]).Value;
+        order.ClearDomainEvents();
+
+        var result = order.ConfirmStockReserved();
+
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value);
+        Assert.Equal(OrderStatus.Unpaid, order.Status);
+        Assert.IsType<OrderCreatedEvent>(Assert.Single(order.DomainEvents));
+    }
+
+    [Fact]
+    public void RejectStockReservation_WhenAwaitingStock_MarksRejectedAndRaisesRejectedEvent()
+    {
+        var order = Order.Create(Guid.NewGuid(), "customer@example.com", [CreateProduct()]).Value;
+        order.ClearDomainEvents();
+
+        var result = order.RejectStockReservation("Insufficient stock");
+
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value);
+        Assert.Equal(OrderStatus.Rejected, order.Status);
+        Assert.Equal("Insufficient stock", order.RejectionReason);
+        Assert.NotNull(order.RejectedAt);
+        Assert.IsType<OrderRejectedEvent>(Assert.Single(order.DomainEvents));
     }
 
     [Fact]
@@ -81,7 +111,14 @@ public class OrderTests
     }
 
     private static Order CreateOrder() =>
-        Order.Create(Guid.NewGuid(), "customer@example.com", [CreateProduct()]).Value;
+        CreateConfirmedOrder();
+
+    private static Order CreateConfirmedOrder()
+    {
+        var order = Order.Create(Guid.NewGuid(), "customer@example.com", [CreateProduct()]).Value;
+        order.ConfirmStockReserved();
+        return order;
+    }
 
     private static OrderedProduct CreateProduct() =>
         OrderedProduct.Create(Guid.NewGuid(), "Keyboard", 99.9m, 2).Value;

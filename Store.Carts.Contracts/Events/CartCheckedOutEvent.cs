@@ -8,8 +8,12 @@ public record CartCheckedOutItem(
     decimal Price,
     int Quantity);
 
+[DomainEventName(EventTypeName)]
 public record CartCheckedOutEvent(
     Guid CartId,
     Guid CustomerId,
     string CustomerEmail,
-    IReadOnlyList<CartCheckedOutItem> Items) : IDomainEvent;
+    IReadOnlyList<CartCheckedOutItem> Items) : DomainEvent(EventTypeName)
+{
+    public const string EventTypeName = "carts.cart_checked_out";
+}

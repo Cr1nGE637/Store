@@ -30,7 +30,20 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         if (existing.IsSuccess)
             return Result.Failure<CreateProductDto>("Product already exists");
 
-        var productResult = Product.Create(request.ProductName, request.ProductDescription, request.ProductPrice, request.CategoryId);
+        var existingSku = await _productRepository.GetBySkuAsync(request.Sku);
+        if (existingSku.IsSuccess)
+            return Result.Failure<CreateProductDto>("Product SKU already exists");
+
+        var productResult = Product.Create(
+            request.Sku,
+            request.ProductName,
+            request.ProductDescription,
+            request.ProductPrice,
+            request.Brand,
+            request.Model,
+            request.WarrantyMonths,
+            request.CategoryId,
+            request.Specifications);
         if (productResult.IsFailure)
             return Result.Failure<CreateProductDto>(productResult.Error);
 

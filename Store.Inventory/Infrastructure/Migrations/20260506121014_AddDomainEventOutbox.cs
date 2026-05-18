@@ -14,6 +14,17 @@ namespace Store.Inventory.Infrastructure.Migrations
             migrationBuilder.EnsureSchema(
                 name: "inventory");
 
+            migrationBuilder.Sql(
+                """
+                DO $$
+                BEGIN
+                    IF to_regclass('public."StockItems"') IS NOT NULL
+                       AND to_regclass('inventory."StockItems"') IS NULL THEN
+                        ALTER TABLE public."StockItems" SET SCHEMA inventory;
+                    END IF;
+                END $$;
+                """);
+
             migrationBuilder.CreateTable(
                 name: "domain_event_outbox",
                 schema: "inventory",
