@@ -76,7 +76,13 @@ public class Cart : AggregateRoot
         return item.ChangeQuantity(quantity);
     }
 
-    public Result<IReadOnlyList<CartItem>> Checkout(string customerEmail)
+    public Result<IReadOnlyList<CartItem>> Checkout(
+        string customerEmail,
+        string recipientName,
+        string phone,
+        string deliveryAddress,
+        string deliveryMethod,
+        string paymentMethod)
     {
         if (IsCheckoutPending)
             return Result.Failure<IReadOnlyList<CartItem>>("Cart checkout is pending");
@@ -84,13 +90,35 @@ public class Cart : AggregateRoot
         if (_items.Count == 0)
             return Result.Failure<IReadOnlyList<CartItem>>("Cart is empty");
 
+        if (string.IsNullOrWhiteSpace(customerEmail))
+            return Result.Failure<IReadOnlyList<CartItem>>("Customer email is required");
+        if (string.IsNullOrWhiteSpace(recipientName))
+            return Result.Failure<IReadOnlyList<CartItem>>("Recipient name is required");
+        if (string.IsNullOrWhiteSpace(phone))
+            return Result.Failure<IReadOnlyList<CartItem>>("Phone is required");
+        if (string.IsNullOrWhiteSpace(deliveryAddress))
+            return Result.Failure<IReadOnlyList<CartItem>>("Delivery address is required");
+        if (string.IsNullOrWhiteSpace(deliveryMethod))
+            return Result.Failure<IReadOnlyList<CartItem>>("Delivery method is required");
+        if (string.IsNullOrWhiteSpace(paymentMethod))
+            return Result.Failure<IReadOnlyList<CartItem>>("Payment method is required");
+
         var snapshot = _items.ToList();
         IsCheckoutPending = true;
 
         var eventItems = snapshot
             .Select(i => new CartCheckedOutItem(i.ProductId, i.ProductName, i.Price, i.Quantity))
             .ToList();
-        RaiseDomainEvent(new CartCheckedOutEvent(CartId, CustomerId, customerEmail, eventItems));
+        RaiseDomainEvent(new CartCheckedOutEvent(
+            CartId,
+            CustomerId,
+            customerEmail.Trim(),
+            recipientName.Trim(),
+            phone.Trim(),
+            deliveryAddress.Trim(),
+            deliveryMethod.Trim(),
+            paymentMethod.Trim(),
+            eventItems));
 
         return Result.Success<IReadOnlyList<CartItem>>(snapshot);
     }

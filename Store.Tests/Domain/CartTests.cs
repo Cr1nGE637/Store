@@ -30,7 +30,7 @@ public class CartTests
         var cart = Cart.Create(customerId).Value;
         cart.AddItem(productId, "Keyboard", 99.9m, 2);
 
-        var result = cart.Checkout("customer@example.com");
+        var result = Checkout(cart);
 
         Assert.True(result.IsSuccess);
         var checkedOutItem = Assert.Single(result.Value);
@@ -42,6 +42,11 @@ public class CartTests
         Assert.Equal(cart.CartId, domainEvent.CartId);
         Assert.Equal(customerId, domainEvent.CustomerId);
         Assert.Equal("customer@example.com", domainEvent.CustomerEmail);
+        Assert.Equal("Ivan Petrov", domainEvent.RecipientName);
+        Assert.Equal("+79990000000", domainEvent.Phone);
+        Assert.Equal("Tomsk, Lenina 1", domainEvent.DeliveryAddress);
+        Assert.Equal("Courier", domainEvent.DeliveryMethod);
+        Assert.Equal("Card", domainEvent.PaymentMethod);
 
         var eventItem = Assert.Single(domainEvent.Items);
         Assert.Equal(productId, eventItem.ProductId);
@@ -56,7 +61,7 @@ public class CartTests
         var cart = Cart.Create(Guid.NewGuid()).Value;
         var productId = Guid.NewGuid();
         cart.AddItem(productId, "Keyboard", 99.9m, 2);
-        cart.Checkout("customer@example.com");
+        Checkout(cart);
 
         var result = cart.AddItem(Guid.NewGuid(), "Mouse", 49.9m, 1);
 
@@ -71,7 +76,7 @@ public class CartTests
     {
         var cart = Cart.Create(Guid.NewGuid()).Value;
         cart.AddItem(Guid.NewGuid(), "Keyboard", 99.9m, 2);
-        cart.Checkout("customer@example.com");
+        Checkout(cart);
 
         var result = cart.CompleteCheckout();
 
@@ -87,7 +92,7 @@ public class CartTests
         var cart = Cart.Create(Guid.NewGuid()).Value;
         var productId = Guid.NewGuid();
         cart.AddItem(productId, "Keyboard", 99.9m, 2);
-        cart.Checkout("customer@example.com");
+        Checkout(cart);
 
         var result = cart.ReleaseCheckout();
 
@@ -103,10 +108,25 @@ public class CartTests
     {
         var cart = Cart.Create(Guid.NewGuid()).Value;
 
-        var result = cart.Checkout("customer@example.com");
+        var result = cart.Checkout(
+            "customer@example.com",
+            "Ivan Petrov",
+            "+79990000000",
+            "Tomsk, Lenina 1",
+            "Courier",
+            "Card");
 
         Assert.True(result.IsFailure);
         Assert.Equal("Cart is empty", result.Error);
         Assert.Empty(cart.DomainEvents);
     }
+
+    private static CSharpFunctionalExtensions.Result<IReadOnlyList<Store.Carts.Domain.Entities.CartItem>> Checkout(Cart cart) =>
+        cart.Checkout(
+            "customer@example.com",
+            "Ivan Petrov",
+            "+79990000000",
+            "Tomsk, Lenina 1",
+            "Courier",
+            "Card");
 }

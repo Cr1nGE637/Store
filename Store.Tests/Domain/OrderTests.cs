@@ -13,12 +13,17 @@ public class OrderTests
         var customerId = Guid.NewGuid();
         var product = CreateProduct();
 
-        var result = Order.Create(customerId, "customer@example.com", [product]);
+        var result = CreateOrder(customerId, [product]);
 
         Assert.True(result.IsSuccess);
         var order = result.Value;
         Assert.Equal(customerId, order.CustomerId);
         Assert.Equal("customer@example.com", order.CustomerEmail);
+        Assert.Equal("Ivan Petrov", order.RecipientName);
+        Assert.Equal("+79990000000", order.Phone);
+        Assert.Equal("Tomsk, Lenina 1", order.DeliveryAddress);
+        Assert.Equal("Courier", order.DeliveryMethod);
+        Assert.Equal("Card", order.PaymentMethod);
         Assert.Equal(OrderStatus.AwaitingStock, order.Status);
         Assert.Single(order.Products);
 
@@ -32,7 +37,7 @@ public class OrderTests
     [Fact]
     public void ConfirmStockReserved_WhenAwaitingStock_MarksUnpaidAndRaisesCreatedEvent()
     {
-        var order = Order.Create(Guid.NewGuid(), "customer@example.com", [CreateProduct()]).Value;
+        var order = CreateAwaitingOrder();
         order.ClearDomainEvents();
 
         var result = order.ConfirmStockReserved();
@@ -46,7 +51,7 @@ public class OrderTests
     [Fact]
     public void RejectStockReservation_WhenAwaitingStock_MarksRejectedAndRaisesRejectedEvent()
     {
-        var order = Order.Create(Guid.NewGuid(), "customer@example.com", [CreateProduct()]).Value;
+        var order = CreateAwaitingOrder();
         order.ClearDomainEvents();
 
         var result = order.RejectStockReservation("Insufficient stock");
@@ -113,9 +118,23 @@ public class OrderTests
     private static Order CreateOrder() =>
         CreateConfirmedOrder();
 
+    private static Order CreateAwaitingOrder() =>
+        CreateOrder(Guid.NewGuid(), [CreateProduct()]).Value;
+
+    private static CSharpFunctionalExtensions.Result<Order> CreateOrder(Guid customerId, IReadOnlyList<OrderedProduct> products) =>
+        Order.Create(
+            customerId,
+            "customer@example.com",
+            "Ivan Petrov",
+            "+79990000000",
+            "Tomsk, Lenina 1",
+            "Courier",
+            "Card",
+            products);
+
     private static Order CreateConfirmedOrder()
     {
-        var order = Order.Create(Guid.NewGuid(), "customer@example.com", [CreateProduct()]).Value;
+        var order = CreateAwaitingOrder();
         order.ConfirmStockReserved();
         return order;
     }

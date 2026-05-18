@@ -47,6 +47,11 @@ public class CartCheckedOutEventHandler(
         var orderResult = Order.Create(
             notification.CustomerId,
             notification.CustomerEmail,
+            notification.RecipientName,
+            notification.Phone,
+            notification.DeliveryAddress,
+            notification.DeliveryMethod,
+            notification.PaymentMethod,
             productResults.Select(r => r.Value).ToList(),
             notification.EventId);
 

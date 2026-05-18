@@ -20,7 +20,13 @@ public class CheckoutCommandHandler(
 
         var cart = cartResult.Value;
 
-        var checkoutResult = cart.Checkout(request.CustomerEmail);
+        var checkoutResult = cart.Checkout(
+            request.CustomerEmail,
+            request.RecipientName,
+            request.Phone,
+            request.DeliveryAddress,
+            request.DeliveryMethod,
+            request.PaymentMethod);
         if (checkoutResult.IsFailure)
             return Result.Failure<CheckoutResultDto>(checkoutResult.Error);
 

@@ -13,6 +13,11 @@ public class OrderConfiguration : IEntityTypeConfiguration<OrderEntity>
         builder.Property(o => o.SourceCheckoutId);
         builder.Property(o => o.CustomerId).IsRequired();
         builder.Property(o => o.CustomerEmail).IsRequired().HasMaxLength(256);
+        builder.Property(o => o.RecipientName).IsRequired().HasMaxLength(200);
+        builder.Property(o => o.Phone).IsRequired().HasMaxLength(50);
+        builder.Property(o => o.DeliveryAddress).IsRequired().HasMaxLength(500);
+        builder.Property(o => o.DeliveryMethod).IsRequired().HasMaxLength(100);
+        builder.Property(o => o.PaymentMethod).IsRequired().HasMaxLength(100);
         builder.Property(o => o.Status).IsRequired().HasConversion<string>();
         builder.Property(o => o.CreatedAt).IsRequired();
         builder.Property(o => o.PaidAt);

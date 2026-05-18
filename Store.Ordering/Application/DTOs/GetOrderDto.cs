@@ -9,6 +9,11 @@ public record OrderedProductDto(
 public record GetOrderDto(
     Guid OrderId,
     Guid CustomerId,
+    string RecipientName,
+    string Phone,
+    string DeliveryAddress,
+    string DeliveryMethod,
+    string PaymentMethod,
     string Status,
     DateTime CreatedAt,
     DateTime? PaidAt,

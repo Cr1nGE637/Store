@@ -12,6 +12,11 @@ public class Order : AggregateRoot
     public Guid? SourceCheckoutId { get; private set; }
     public Guid CustomerId { get; private set; }
     public string CustomerEmail { get; private set; } = string.Empty;
+    public string RecipientName { get; private set; } = string.Empty;
+    public string Phone { get; private set; } = string.Empty;
+    public string DeliveryAddress { get; private set; } = string.Empty;
+    public string DeliveryMethod { get; private set; } = string.Empty;
+    public string PaymentMethod { get; private set; } = string.Empty;
     public OrderStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? PaidAt { get; private set; }
@@ -22,20 +27,57 @@ public class Order : AggregateRoot
     private readonly List<OrderedProduct> _products = [];
     public IReadOnlyList<OrderedProduct> Products => _products.AsReadOnly();
 
-    private Order(Guid orderId, Guid? sourceCheckoutId, Guid customerId, string customerEmail, OrderStatus status, DateTime createdAt)
+    private Order(
+        Guid orderId,
+        Guid? sourceCheckoutId,
+        Guid customerId,
+        string customerEmail,
+        string recipientName,
+        string phone,
+        string deliveryAddress,
+        string deliveryMethod,
+        string paymentMethod,
+        OrderStatus status,
+        DateTime createdAt)
     {
         OrderId = orderId;
         SourceCheckoutId = sourceCheckoutId;
         CustomerId = customerId;
         CustomerEmail = customerEmail;
+        RecipientName = recipientName;
+        Phone = phone;
+        DeliveryAddress = deliveryAddress;
+        DeliveryMethod = deliveryMethod;
+        PaymentMethod = paymentMethod;
         Status = status;
         CreatedAt = createdAt;
     }
 
-    public static Result<Order> Create(Guid customerId, string customerEmail, IReadOnlyList<OrderedProduct> products, Guid? sourceCheckoutId = null)
+    public static Result<Order> Create(
+        Guid customerId,
+        string customerEmail,
+        string recipientName,
+        string phone,
+        string deliveryAddress,
+        string deliveryMethod,
+        string paymentMethod,
+        IReadOnlyList<OrderedProduct> products,
+        Guid? sourceCheckoutId = null)
     {
         if (customerId == Guid.Empty)
             return Result.Failure<Order>("CustomerId is required");
+        if (string.IsNullOrWhiteSpace(customerEmail))
+            return Result.Failure<Order>("Customer email is required");
+        if (string.IsNullOrWhiteSpace(recipientName))
+            return Result.Failure<Order>("Recipient name is required");
+        if (string.IsNullOrWhiteSpace(phone))
+            return Result.Failure<Order>("Phone is required");
+        if (string.IsNullOrWhiteSpace(deliveryAddress))
+            return Result.Failure<Order>("Delivery address is required");
+        if (string.IsNullOrWhiteSpace(deliveryMethod))
+            return Result.Failure<Order>("Delivery method is required");
+        if (string.IsNullOrWhiteSpace(paymentMethod))
+            return Result.Failure<Order>("Payment method is required");
         if (sourceCheckoutId == Guid.Empty)
             return Result.Failure<Order>("SourceCheckoutId cannot be empty");
         if (products.Count == 0)
@@ -43,16 +85,28 @@ public class Order : AggregateRoot
         if (products.GroupBy(p => p.ProductId).Any(g => g.Count() > 1))
             return Result.Failure<Order>("Order cannot contain duplicate products");
 
-        var order = new Order(Guid.NewGuid(), sourceCheckoutId, customerId, customerEmail, OrderStatus.AwaitingStock, DateTime.UtcNow);
+        var order = new Order(
+            Guid.NewGuid(),
+            sourceCheckoutId,
+            customerId,
+            customerEmail.Trim(),
+            recipientName.Trim(),
+            phone.Trim(),
+            deliveryAddress.Trim(),
+            deliveryMethod.Trim(),
+            paymentMethod.Trim(),
+            OrderStatus.AwaitingStock,
+            DateTime.UtcNow);
         order._products.AddRange(products);
         order.RaiseDomainEvent(new OrderStockReservationRequestedEvent(order.OrderId, order.CustomerId, order.CustomerEmail, order.MapToItems()));
         return Result.Success(order);
     }
 
     internal static Order Reconstitute(
-        Guid orderId, Guid? sourceCheckoutId, Guid customerId, string customerEmail, OrderStatus status,
+        Guid orderId, Guid? sourceCheckoutId, Guid customerId, string customerEmail,
+        string recipientName, string phone, string deliveryAddress, string deliveryMethod, string paymentMethod, OrderStatus status,
         DateTime createdAt, DateTime? paidAt, DateTime? cancelledAt, DateTime? rejectedAt, string? rejectionReason) =>
-        new(orderId, sourceCheckoutId, customerId, customerEmail, status, createdAt)
+        new(orderId, sourceCheckoutId, customerId, customerEmail, recipientName, phone, deliveryAddress, deliveryMethod, paymentMethod, status, createdAt)
         {
             PaidAt = paidAt,
             CancelledAt = cancelledAt,

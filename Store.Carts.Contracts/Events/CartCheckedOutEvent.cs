@@ -13,6 +13,11 @@ public record CartCheckedOutEvent(
     Guid CartId,
     Guid CustomerId,
     string CustomerEmail,
+    string RecipientName,
+    string Phone,
+    string DeliveryAddress,
+    string DeliveryMethod,
+    string PaymentMethod,
     IReadOnlyList<CartCheckedOutItem> Items) : DomainEvent(EventTypeName)
 {
     public const string EventTypeName = "carts.cart_checked_out";

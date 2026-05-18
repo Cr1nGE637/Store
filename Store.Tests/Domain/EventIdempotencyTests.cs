@@ -35,6 +35,11 @@ public class EventIdempotencyTests
             Guid.NewGuid(),
             Guid.NewGuid(),
             "customer@example.com",
+            "Ivan Petrov",
+            "+79990000000",
+            "Tomsk, Lenina 1",
+            "Courier",
+            "Card",
             [new CartCheckedOutItem(Guid.NewGuid(), "Keyboard", 99.9m, 1)]);
 
         await handler.Handle(notification, CancellationToken.None);
@@ -147,7 +152,16 @@ public class EventIdempotencyTests
     private static Order CreateAwaitingStockOrder()
     {
         var product = OrderedProduct.Create(Guid.NewGuid(), "Keyboard", 99.9m, 1).Value;
-        return Order.Create(Guid.NewGuid(), "customer@example.com", [product], Guid.NewGuid()).Value;
+        return Order.Create(
+            Guid.NewGuid(),
+            "customer@example.com",
+            "Ivan Petrov",
+            "+79990000000",
+            "Tomsk, Lenina 1",
+            "Courier",
+            "Card",
+            [product],
+            Guid.NewGuid()).Value;
     }
 
     private sealed class FakeOrderRepository : IOrderRepository

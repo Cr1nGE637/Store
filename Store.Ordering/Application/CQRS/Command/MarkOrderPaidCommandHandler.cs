@@ -17,6 +17,9 @@ public class MarkOrderPaidCommandHandler(
             return Result.Failure(orderResult.Error);
 
         var order = orderResult.Value;
+        if (request.CustomerId.HasValue && order.CustomerId != request.CustomerId.Value)
+            return Result.Failure("Access denied");
+
         var payResult = order.MarkAsPaid();
         if (payResult.IsFailure)
             return payResult;

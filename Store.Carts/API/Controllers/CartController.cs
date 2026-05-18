@@ -62,11 +62,20 @@ public class CartController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(CheckoutResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Checkout(CancellationToken cancellationToken)
+    public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request, CancellationToken cancellationToken)
     {
         if (!TryGetCustomerId(out var customerId)) return Unauthorized();
         var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
-        var result = await mediator.Send(new CheckoutCommand { CustomerId = customerId, CustomerEmail = email }, cancellationToken);
+        var result = await mediator.Send(new CheckoutCommand
+        {
+            CustomerId = customerId,
+            CustomerEmail = email,
+            RecipientName = request.RecipientName,
+            Phone = request.Phone,
+            DeliveryAddress = request.DeliveryAddress,
+            DeliveryMethod = request.DeliveryMethod,
+            PaymentMethod = request.PaymentMethod
+        }, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 

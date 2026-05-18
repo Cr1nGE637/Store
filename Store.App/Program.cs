@@ -86,6 +86,7 @@ using (var scope = app.Services.CreateScope())
     await services.ApplyMigrationsAsync<OrderingDbContext>();
     await services.ApplyMigrationsAsync<InventoryDbContext>();
     await services.ApplyMigrationsAsync<NotificationsDbContext>();
+    await services.SeedDemoElectronicsAsync();
     await services.SyncCartProductCacheAsync();
 }
 

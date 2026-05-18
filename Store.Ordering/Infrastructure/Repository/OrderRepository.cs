@@ -86,7 +86,8 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
     private static Order MapToDomain(OrderEntity entity)
     {
         var order = Order.Reconstitute(
-            entity.OrderId, entity.SourceCheckoutId, entity.CustomerId, entity.CustomerEmail, entity.Status,
+            entity.OrderId, entity.SourceCheckoutId, entity.CustomerId, entity.CustomerEmail,
+            entity.RecipientName, entity.Phone, entity.DeliveryAddress, entity.DeliveryMethod, entity.PaymentMethod, entity.Status,
             entity.CreatedAt, entity.PaidAt, entity.CancelledAt, entity.RejectedAt, entity.RejectionReason);
         var products = entity.Products.Select(p =>
         {
@@ -106,6 +107,11 @@ public class OrderRepository(OrderingDbContext context) : IOrderRepository
         SourceCheckoutId = order.SourceCheckoutId,
         CustomerId = order.CustomerId,
         CustomerEmail = order.CustomerEmail,
+        RecipientName = order.RecipientName,
+        Phone = order.Phone,
+        DeliveryAddress = order.DeliveryAddress,
+        DeliveryMethod = order.DeliveryMethod,
+        PaymentMethod = order.PaymentMethod,
         Status = order.Status,
         CreatedAt = order.CreatedAt,
         PaidAt = order.PaidAt,

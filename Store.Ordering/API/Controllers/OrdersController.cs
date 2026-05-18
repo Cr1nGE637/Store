@@ -50,6 +50,21 @@ public class OrdersController(IMediator mediator) : ControllerBase
         return result.IsSuccess ? Ok() : BadRequest(result.Error);
     }
 
+    [HttpPost("{orderId:guid}/payment")]
+    [Authorize(Roles = "Customer")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> PayAsCustomer(Guid orderId)
+    {
+        if (!TryGetRequesterId(out var requesterId)) return Unauthorized();
+        var result = await mediator.Send(new MarkOrderPaidCommand(orderId, requesterId));
+        if (result.IsFailure)
+            return result.Error == "Access denied" ? Forbid() : BadRequest(result.Error);
+        return Ok();
+    }
+
     [HttpPost("{orderId:guid}/cancel")]
     [Authorize(Roles = "Customer")]
     [ProducesResponseType(StatusCodes.Status200OK)]

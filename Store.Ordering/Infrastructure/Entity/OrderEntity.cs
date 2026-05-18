@@ -8,6 +8,11 @@ public class OrderEntity
     public Guid? SourceCheckoutId { get; set; }
     public Guid CustomerId { get; set; }
     public string CustomerEmail { get; set; } = string.Empty;
+    public string RecipientName { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string DeliveryAddress { get; set; } = string.Empty;
+    public string DeliveryMethod { get; set; } = string.Empty;
+    public string PaymentMethod { get; set; } = string.Empty;
     public OrderStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? PaidAt { get; set; }
