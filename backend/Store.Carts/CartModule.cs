@@ -1,0 +1,42 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Store.EventOutbox.Infrastructure.Services;
+using Store.Carts.Application.CQRS.Command;
+using Store.Carts.Application.Interfaces;
+using Store.Carts.Domain.Interfaces;
+using Store.Carts.Infrastructure.DbContexts;
+using Store.Carts.Infrastructure.Repository;
+using Store.Carts.Infrastructure.Services;
+
+namespace Store.Carts;
+
+public static class CartModule
+{
+    public static IServiceCollection AddCartModule(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<CartDbContext>(options =>
+            options.UseNpgsql(
+                configuration.GetConnectionString("CartDbConnectionString"),
+                npgsql =>
+                {
+                    npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "cart");
+                    npgsql.EnableRetryOnFailure();
+                }));
+
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssembly(typeof(AddItemCommand).Assembly));
+
+        services.AddScoped<ICartRepository, CartRepository>();
+        services.AddScoped<IProductCacheRepository, ProductCacheRepository>();
+        services.AddScoped<ICartUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICartDomainEventOutbox, CartDomainEventOutbox>();
+        services.AddScoped<ICartDomainEventInbox, CartDomainEventInbox>();
+        services.AddScoped<CheckoutOrderTracker>();
+        services.AddScoped<ICheckoutOrderLookup>(sp => sp.GetRequiredService<CheckoutOrderTracker>());
+        services.AddScoped<ICheckoutOrderRecorder>(sp => sp.GetRequiredService<CheckoutOrderTracker>());
+        services.AddHostedService<DomainEventOutboxProcessor<CartDbContext>>();
+
+        return services;
+    }
+}

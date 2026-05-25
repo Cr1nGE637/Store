@@ -1,0 +1,20 @@
+using Microsoft.EntityFrameworkCore;
+using Store.EventOutbox.Infrastructure.Extensions;
+using Store.Carts.Infrastructure.Entity;
+
+namespace Store.Carts.Infrastructure.DbContexts;
+
+public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(options)
+{
+    public DbSet<CartEntity> Carts { get; set; }
+    public DbSet<CartItemEntity> CartItems { get; set; }
+    public DbSet<ProductCacheEntity> ProductCache { get; set; }
+    public DbSet<CheckoutOrderEntity> CheckoutOrders { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema("cart");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CartDbContext).Assembly);
+        modelBuilder.ConfigureDomainEventOutbox();
+    }
+}

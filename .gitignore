@@ -1,6 +1,7 @@
 # Build output
 bin/
 obj/
+dist/
 
 # NuGet
 *.nupkg
@@ -35,6 +36,7 @@ TestResults/
 # .NET secrets & local config
 appsettings.Local.json
 secrets.json
+.data-protection-keys/
 
 # Docker secrets — copy .env.example → .env and fill in values
 .env
@@ -50,3 +52,6 @@ desktop.ini
 # Logs
 *.log
 logs/
+
+# Frontend
+node_modules/

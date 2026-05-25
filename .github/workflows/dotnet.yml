@@ -19,10 +19,13 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore
+        working-directory: backend
         run: dotnet restore Store.sln --disable-parallel
 
       - name: Build
+        working-directory: backend
         run: dotnet build Store.sln --configuration Release --no-restore -maxcpucount:1
 
       - name: Test
+        working-directory: backend
         run: dotnet test Store.sln --configuration Release --no-build -maxcpucount:1 --verbosity normal
