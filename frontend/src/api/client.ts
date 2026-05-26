@@ -204,6 +204,13 @@ export const api = {
     });
   },
 
+  updateProduct(productId: string, payload: ProductPayload) {
+    return request<Product>(`/Products/${productId}`, {
+      method: "PUT",
+      body: payload
+    });
+  },
+
   replenish(productId: string, amount: number) {
     return request<void>("/Inventory/replenish", {
       method: "POST",

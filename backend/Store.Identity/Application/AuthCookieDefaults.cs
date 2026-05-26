@@ -1,4 +1,4 @@
-namespace Store.Identity.Infrastructure.Configuration;
+namespace Store.Identity.Application;
 
 public static class AuthCookieDefaults
 {

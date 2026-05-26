@@ -10,4 +10,5 @@ public class CartItemEntity
     public int Quantity { get; set; }
 
     public CartEntity Cart { get; set; } = null!;
+    public ProductCacheEntity Product { get; set; } = null!;
 }

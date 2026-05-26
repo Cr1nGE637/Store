@@ -21,6 +21,7 @@ type ShellProps = {
 
 export function Shell({ auth, cartCount, children, notice, view, onDismissNotice, onLogout, onViewChange }: ShellProps) {
   const isManager = auth?.role === "Manager";
+  const subtitle = viewSubtitle(view);
 
   return (
     <AppShell>
@@ -86,7 +87,7 @@ export function Shell({ auth, cartCount, children, notice, view, onDismissNotice
         <Topbar>
           <div>
             <h1>{viewTitle(view)}</h1>
-            <p>{viewSubtitle(view)}</p>
+            {subtitle && <p>{subtitle}</p>}
           </div>
           {notice && <Notice onClick={onDismissNotice}>{notice}</Notice>}
         </Topbar>

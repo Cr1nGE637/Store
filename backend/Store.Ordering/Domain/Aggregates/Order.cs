@@ -144,7 +144,7 @@ public class Order : AggregateRoot
 
         Status = OrderStatus.Cancelled;
         CancelledAt = DateTime.UtcNow;
-        RaiseDomainEvent(new OrderCancelledEvent(OrderId, CustomerId, CustomerEmail, MapToItems()));
+        RaiseDomainEvent(new OrderCancelledEvent(OrderId, CustomerId, CustomerEmail, MapToItems(), SourceCheckoutId));
         return Result.Success(true);
     }
 

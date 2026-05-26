@@ -45,7 +45,7 @@ export function AuthView({ onLogin }: AuthViewProps) {
           <UserRound size={28} />
         </IconMark>
         <HeaderBlock>
-          <h2>{mode === "login" ? "Вход в аккаунт" : "Регистрация покупателя"}</h2>
+          <h2>{mode === "login" ? "Вход в аккаунт" : "Регистрация"}</h2>
           <p>{mode === "login" ? "Введите email и пароль для входа." : "Создайте аккаунт и продолжите оформление заказа."}</p>
         </HeaderBlock>
 

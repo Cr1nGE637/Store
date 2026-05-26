@@ -25,6 +25,11 @@ public class ProductAvailabilityRepository(CatalogDbContext dbContext) : IProduc
 
     public async Task UpsertAsync(Guid productId, int availableQuantity, CancellationToken cancellationToken)
     {
+        var productExists = await dbContext.Products
+            .AnyAsync(product => product.ProductId == productId, cancellationToken);
+        if (!productExists)
+            return;
+
         var entity = await dbContext.ProductAvailabilities
             .FirstOrDefaultAsync(availability => availability.ProductId == productId, cancellationToken);
 

@@ -6,4 +6,5 @@ public class ProductCacheEntity
     public string ProductName { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool IsAvailable { get; set; }
+    public List<CartItemEntity> CartItems { get; set; } = [];
 }

@@ -7,7 +7,8 @@ public record OrderCancelledEvent(
     Guid OrderId,
     Guid CustomerId,
     string CustomerEmail,
-    IReadOnlyList<OrderItem> Items) : DomainEvent(EventTypeName)
+    IReadOnlyList<OrderItem> Items,
+    Guid? SourceCheckoutId = null) : DomainEvent(EventTypeName)
 {
     public const string EventTypeName = "ordering.order_cancelled";
 }

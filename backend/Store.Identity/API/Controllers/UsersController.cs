@@ -1,13 +1,12 @@
 ﻿using Store.Identity.Application.CQRS.Command;
 using Store.Identity.Application.CQRS.Query;
 using Store.Identity.Application.DTOs;
-using Store.Identity.Infrastructure.Configuration;
+using Store.Identity.Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Options;
 
 namespace Store.Identity.API.Controllers;
 
@@ -16,12 +15,12 @@ namespace Store.Identity.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly JwtOptions _jwtOptions;
+    private readonly IAuthCookieSettings _authCookieSettings;
 
-    public UsersController(IMediator mediator, IOptions<JwtOptions> jwtOptions)
+    public UsersController(IMediator mediator, IAuthCookieSettings authCookieSettings)
     {
         _mediator = mediator;
-        _jwtOptions = jwtOptions.Value;
+        _authCookieSettings = authCookieSettings;
     }
 
     [HttpPost("register")]
@@ -46,12 +45,12 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(command, token);
         if (result.IsSuccess)
         {
-            Response.Cookies.Append(AuthCookieDefaults.Name, result.Value.Token, new CookieOptions
+            Response.Cookies.Append(_authCookieSettings.CookieName, result.Value.Token, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(_jwtOptions.ExpiresHours)
+                Expires = _authCookieSettings.ExpiresAtUtc()
             });
         }
         if (result.IsFailure)
@@ -65,7 +64,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete(AuthCookieDefaults.Name, new CookieOptions
+        Response.Cookies.Delete(_authCookieSettings.CookieName, new CookieOptions
         {
             HttpOnly = true,
             Secure = Request.IsHttps,

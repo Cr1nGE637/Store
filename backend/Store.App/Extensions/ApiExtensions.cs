@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Store.Identity.Application;
 using Store.Identity.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;

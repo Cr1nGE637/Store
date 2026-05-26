@@ -4,6 +4,7 @@ import { GhostButton, PrimaryButton } from "../../components/ui/buttons";
 import { CardHeading, EmptyState, FormError, MetaRow, SoftBadge } from "../../components/ui/common";
 import { useOrderActions } from "../../hooks/useOrderActions";
 import { money } from "../../utils/format";
+import { canCancelOrder, canPayOrder, orderStatusLabel, orderStatusTone } from "../../utils/orderStatus";
 
 type OrdersViewProps = {
   hasPendingCheckout: boolean;
@@ -13,7 +14,7 @@ type OrdersViewProps = {
 };
 
 export function OrdersView({ hasPendingCheckout, isAuthed, isRefreshing, orders }: OrdersViewProps) {
-  const { cancel, errorByOrderId, pay, pendingOrderId } = useOrderActions();
+  const { cancel, errorByOrderId, getEffectiveStatus, isPaymentProcessing, pay, pendingOrderId } = useOrderActions();
 
   const checkoutNotice = hasPendingCheckout ? (
     <ProcessingNotice>
@@ -36,62 +37,57 @@ export function OrdersView({ hasPendingCheckout, isAuthed, isRefreshing, orders 
     <>
       {checkoutNotice}
       <OrdersList>
-      {orders.map((order) => (
-        <OrderCard key={order.orderId}>
-          <CardHeading>
-            <div>
-              <strong>Заказ {order.orderId.slice(0, 8)}</strong>
-              <span>{new Date(order.createdAt).toLocaleString("ru-RU")}</span>
-            </div>
-            <OrderSummary>
-              <SoftBadge>{money.format(order.totalAmount)}</SoftBadge>
-              <StatusPill $status={statusTone(order.status)}>{statusLabel(order.status)}</StatusPill>
-            </OrderSummary>
-          </CardHeading>
-          <OrderProducts>
-            {order.products.map((product) => (
-              <span key={product.productId}>
-                {product.productName} x {product.quantity}
-              </span>
-            ))}
-          </OrderProducts>
-          <MetaRow>
-            <span>{order.recipientName}</span>
-            <span>{order.phone}</span>
-          </MetaRow>
-          {errorByOrderId[order.orderId] && <FormError>{errorByOrderId[order.orderId]}</FormError>}
-          <ActionRow>
-            <PrimaryButton type="button" disabled={pendingOrderId === order.orderId} onClick={() => void pay(order)}>
-              {pendingOrderId === order.orderId ? "Обновляю..." : "Оплатить"}
-            </PrimaryButton>
-            <GhostButton type="button" disabled={pendingOrderId === order.orderId} onClick={() => void cancel(order)}>
-              Отменить
-            </GhostButton>
-          </ActionRow>
-        </OrderCard>
-      ))}
+        {orders.map((order) => {
+          const status = getEffectiveStatus(order);
+          const paymentProcessing = isPaymentProcessing(order.orderId);
+          const isBusy = pendingOrderId === order.orderId || paymentProcessing;
+          const canPay = canPayOrder(status);
+          const canCancel = canCancelOrder(status);
+
+          return (
+            <OrderCard key={order.orderId}>
+              <CardHeading>
+                <div>
+                  <strong>Заказ {order.orderId.slice(0, 8)}</strong>
+                  <span>{new Date(order.createdAt).toLocaleString("ru-RU")}</span>
+                </div>
+                <OrderSummary>
+                  <SoftBadge>{money.format(order.totalAmount)}</SoftBadge>
+                  <StatusPill $status={paymentProcessing ? "processing" : orderStatusTone(status)}>
+                    {paymentProcessing ? "Оплата обрабатывается" : orderStatusLabel(status)}
+                  </StatusPill>
+                </OrderSummary>
+              </CardHeading>
+              <OrderProducts>
+                {order.products.map((product) => (
+                  <span key={product.productId}>
+                    {product.productName} x {product.quantity}
+                  </span>
+                ))}
+              </OrderProducts>
+              <MetaRow>
+                <span>{order.recipientName}</span>
+                <span>{order.phone}</span>
+              </MetaRow>
+              {errorByOrderId[order.orderId] && <FormError>{errorByOrderId[order.orderId]}</FormError>}
+              <ActionRow>
+                {canPay && (
+                  <PrimaryButton type="button" disabled={isBusy} onClick={() => void pay(order)}>
+                    {paymentProcessing ? "Проверяю оплату..." : pendingOrderId === order.orderId ? "Обновляю..." : "Оплатить"}
+                  </PrimaryButton>
+                )}
+                {canCancel && (
+                  <GhostButton type="button" disabled={isBusy} onClick={() => void cancel(order)}>
+                    Отменить
+                  </GhostButton>
+                )}
+              </ActionRow>
+            </OrderCard>
+          );
+        })}
       </OrdersList>
     </>
   );
-}
-
-function statusTone(status: string) {
-  const normalized = status.toLowerCase();
-  if (normalized.includes("paid")) return "paid";
-  if (normalized.includes("cancel")) return "cancelled";
-  if (normalized.includes("reject")) return "cancelled";
-  if (normalized.includes("reserve")) return "reserved";
-  return "pending";
-}
-
-function statusLabel(status: string) {
-  const normalized = status.toLowerCase();
-  if (normalized.includes("paid")) return "Оплачен";
-  if (normalized.includes("cancel")) return "Отменен";
-  if (normalized.includes("reject")) return "Отклонен";
-  if (normalized.includes("reserve")) return "Зарезервирован";
-  if (normalized.includes("created")) return "Создан";
-  return status;
 }
 
 const ProcessingNotice = styled.div`
@@ -133,12 +129,14 @@ const StatusPill = styled.span<{ $status: string }>`
   color: ${({ $status }) => {
     if ($status === "paid") return "#16684f";
     if ($status === "cancelled") return "#9a342b";
+    if ($status === "processing") return "#5740a3";
     if ($status === "reserved") return "#5740a3";
     return "#7a4b05";
   }};
   background: ${({ $status }) => {
     if ($status === "paid") return "#e6f6ef";
     if ($status === "cancelled") return "#fff1ef";
+    if ($status === "processing") return "#f0edff";
     if ($status === "reserved") return "#f0edff";
     return "#fff5df";
   }};

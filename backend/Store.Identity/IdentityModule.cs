@@ -35,6 +35,7 @@ public static class IdentityModule
             cfg.RegisterServicesFromAssembly(typeof(RegisterCommand).Assembly));
 
         services.AddScoped<IJwtProvider, JwtProvider>();
+        services.AddScoped<IAuthCookieSettings, AuthCookieSettings>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IIdentityUnitOfWork, UnitOfWork>();

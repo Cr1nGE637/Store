@@ -61,6 +61,53 @@ public class CartEventHandlerIdempotencyTests
     }
 
     [Fact]
+    public async Task OrderCancelledHandler_WhenCheckoutMatches_ReleasesCheckoutAndKeepsItems()
+    {
+        var cart = CreatePendingCart();
+        var repository = new FakeCartRepository(cart);
+        var unitOfWork = new FakeCartUnitOfWork();
+        var inbox = new FakeCartDomainEventInbox();
+        var handler = new OrderCancelledEventHandler(
+            repository,
+            unitOfWork,
+            inbox,
+            NullLogger<OrderCancelledEventHandler>.Instance);
+        var notification = CreateOrderCancelledEvent(cart);
+
+        await handler.Handle(notification, CancellationToken.None);
+        await handler.Handle(notification, CancellationToken.None);
+
+        Assert.False(cart.IsCheckoutPending);
+        Assert.Single(cart.Items);
+        Assert.Equal(1, repository.UpdateCallCount);
+        Assert.Equal(1, unitOfWork.SaveChangesCallCount);
+        Assert.Contains(notification.EventId, inbox.ProcessedEventIds);
+    }
+
+    [Fact]
+    public async Task OrderCancelledHandler_WhenCheckoutDoesNotMatch_DoesNotReleaseCurrentCheckout()
+    {
+        var cart = CreatePendingCart();
+        var repository = new FakeCartRepository(cart);
+        var unitOfWork = new FakeCartUnitOfWork();
+        var inbox = new FakeCartDomainEventInbox();
+        var handler = new OrderCancelledEventHandler(
+            repository,
+            unitOfWork,
+            inbox,
+            NullLogger<OrderCancelledEventHandler>.Instance);
+        var notification = CreateOrderCancelledEvent(cart, Guid.NewGuid());
+
+        await handler.Handle(notification, CancellationToken.None);
+
+        Assert.True(cart.IsCheckoutPending);
+        Assert.Single(cart.Items);
+        Assert.Equal(0, repository.UpdateCallCount);
+        Assert.Equal(1, unitOfWork.SaveChangesCallCount);
+        Assert.Contains(notification.EventId, inbox.ProcessedEventIds);
+    }
+
+    [Fact]
     public async Task OrderCreatedHandler_WhenUpdateFails_DoesNotMarkEventProcessed()
     {
         var cart = CreatePendingCart();
@@ -114,6 +161,14 @@ public class CartEventHandlerIdempotencyTests
             "customer@example.com",
             "Insufficient stock",
             [new OrderItem(Guid.NewGuid(), "Keyboard", 99.9m, 1)]);
+
+    private static OrderCancelledEvent CreateOrderCancelledEvent(Cart cart, Guid? sourceCheckoutId = null) =>
+        new(
+            Guid.NewGuid(),
+            cart.CustomerId,
+            "customer@example.com",
+            [new OrderItem(Guid.NewGuid(), "Keyboard", 99.9m, 1)],
+            sourceCheckoutId ?? cart.PendingCheckoutId);
 
     private sealed class FakeCartRepository(Cart cart) : ICartRepository
     {

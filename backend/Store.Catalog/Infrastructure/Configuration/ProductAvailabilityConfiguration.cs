@@ -14,5 +14,9 @@ public class ProductAvailabilityConfiguration : IEntityTypeConfiguration<Product
         builder.Property(a => a.AvailableQuantity).IsRequired();
         builder.Property(a => a.UpdatedOnUtc).IsRequired();
         builder.HasIndex(a => a.AvailableQuantity);
+        builder.HasOne(a => a.Product)
+            .WithOne(p => p.Availability)
+            .HasForeignKey<ProductAvailabilityEntity>(a => a.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

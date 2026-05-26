@@ -1,6 +1,7 @@
 import type { Category, Product } from "../../api/types";
 import { TwoColumn } from "../../components/ui/common";
-import { ProductCreateForm } from "./ProductCreateForm";
+import styled from "styled-components";
+import { ProductCatalogTabs } from "./ProductCatalogTabs";
 import { StockReplenishForm } from "./StockReplenishForm";
 
 type AdminViewProps = {
@@ -12,8 +13,16 @@ type AdminViewProps = {
 export function AdminView({ categories, products, onChanged }: AdminViewProps) {
   return (
     <TwoColumn>
-      <ProductCreateForm categories={categories} onChanged={onChanged} />
-      <StockReplenishForm products={products} onChanged={onChanged} />
+      <ProductCatalogTabs categories={categories} products={products} onChanged={onChanged} />
+      <AdminAside>
+        <StockReplenishForm products={products} onChanged={onChanged} />
+      </AdminAside>
     </TwoColumn>
   );
 }
+
+const AdminAside = styled.div`
+  display: grid;
+  gap: 14px;
+  align-content: start;
+`;

@@ -21,6 +21,12 @@ export const AdminForm = styled(Panel).attrs({ as: "form" })`
   }
 `;
 
+export const AdminInlineForm = styled.form`
+  display: grid;
+  gap: 12px;
+  align-content: start;
+`;
+
 export const FormGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;

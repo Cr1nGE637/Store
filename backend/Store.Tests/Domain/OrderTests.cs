@@ -125,6 +125,27 @@ public class OrderTests
     }
 
     [Fact]
+    public void Cancel_WhenOrderHasSourceCheckout_IncludesSourceCheckoutIdInEvent()
+    {
+        var sourceCheckoutId = Guid.NewGuid();
+        var order = Order.Create(
+            Guid.NewGuid(),
+            "customer@example.com",
+            "Ivan Petrov",
+            "+79990000000",
+            "Card",
+            [CreateProduct()],
+            sourceCheckoutId).Value;
+        order.ClearDomainEvents();
+
+        var result = order.Cancel();
+
+        Assert.True(result.IsSuccess);
+        var domainEvent = Assert.IsType<OrderCancelledEvent>(Assert.Single(order.DomainEvents));
+        Assert.Equal(sourceCheckoutId, domainEvent.SourceCheckoutId);
+    }
+
+    [Fact]
     public void Cancel_WhenOrderIsPaid_FailsWithoutChangingStatus()
     {
         var order = CreateOrder();

@@ -11,5 +11,6 @@ public class ProductEntity
     public string Model { get; set; } = string.Empty;
     public int WarrantyMonths { get; set; }
     public Guid CategoryId { get; set; }
+    public ProductAvailabilityEntity? Availability { get; set; }
     public List<ProductSpecificationEntity> Specifications { get; set; } = [];
 }

@@ -25,9 +25,9 @@ export function viewTitle(view: View) {
 }
 
 export function viewSubtitle(view: View) {
-  if (view === "auth") return "Вход и регистрация покупателя";
+  if (view === "auth") return "Вход и регистрация";
   if (view === "cart") return "Проверьте позиции и оформите онлайн-заказ";
   if (view === "orders") return "Статусы, оплата и отмена заказов покупателя";
-  if (view === "admin") return "Базовые менеджерские действия для демо";
+  if (view === "admin") return "";
   return "Поиск по бренду, категории, цене, наличию и характеристикам";
 }

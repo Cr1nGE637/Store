@@ -7,7 +7,7 @@ import type { Category, ProductPayload } from "../../api/types";
 import { GhostButton, PrimaryButton } from "../../components/ui/buttons";
 import { FormError, SoftBadge } from "../../components/ui/common";
 import { specificationOptions } from "../../utils/specifications";
-import { AdminForm, FormGrid } from "./admin.styles";
+import { AdminForm, AdminInlineForm, FormGrid } from "./admin.styles";
 import styled from "styled-components";
 
 const emptyProduct: ProductPayload = {
@@ -36,13 +36,15 @@ const initialSpecRows: SpecRow[] = [
 type ProductCreateFormProps = {
   categories: Category[];
   onChanged: () => Promise<unknown>;
+  embedded?: boolean;
 };
 
-export function ProductCreateForm({ categories, onChanged }: ProductCreateFormProps) {
+export function ProductCreateForm({ categories, onChanged, embedded = false }: ProductCreateFormProps) {
   const [payload, setPayload] = useState<ProductPayload>({ ...emptyProduct, categoryId: categories[0]?.categoryId ?? "" });
   const [specRows, setSpecRows] = useState<SpecRow[]>(initialSpecRows);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const FormShell = embedded ? AdminInlineForm : AdminForm;
   const queryClient = useQueryClient();
   const createProductMutation = useMutation({
     mutationFn: api.createProduct,
@@ -125,8 +127,8 @@ export function ProductCreateForm({ categories, onChanged }: ProductCreateFormPr
   }
 
   return (
-    <AdminForm onSubmit={createProduct}>
-      <h2>Новый товар</h2>
+    <FormShell onSubmit={createProduct}>
+      {!embedded && <h2>Новый товар</h2>}
       <input value={payload.productName} onChange={(event) => setPayload({ ...payload, productName: event.target.value })} placeholder="Название" />
       <input value={payload.sku} onChange={(event) => setPayload({ ...payload, sku: event.target.value })} placeholder="SKU" />
       <input value={payload.brand} onChange={(event) => setPayload({ ...payload, brand: event.target.value })} placeholder="Бренд" />
@@ -177,7 +179,7 @@ export function ProductCreateForm({ categories, onChanged }: ProductCreateFormPr
       <PrimaryButton type="submit" disabled={isSubmitting}>
         <PackagePlus size={18} /> {isSubmitting ? "Создаю..." : "Создать товар"}
       </PrimaryButton>
-    </AdminForm>
+    </FormShell>
   );
 }
 

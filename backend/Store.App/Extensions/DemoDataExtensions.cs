@@ -63,17 +63,17 @@ public static class DemoDataExtensions
         new()
         {
             Id = DemoIds.Customer,
-            Name = "Demo Customer",
-            Email = "customer@demo.local",
-            PasswordHash = passwordHasher.Generate("Customer123!"),
+            Name = "Customer",
+            Email = "customer@gmail.com",
+            PasswordHash = passwordHasher.Generate("customer123"),
             Role = "Customer"
         },
         new()
         {
             Id = DemoIds.Manager,
-            Name = "Demo Manager",
-            Email = "manager@demo.local",
-            PasswordHash = passwordHasher.Generate("Manager123!"),
+            Name = "Manager",
+            Email = "manager@gmail.com",
+            PasswordHash = passwordHasher.Generate("manager123"),
             Role = "Manager"
         }
     ];
