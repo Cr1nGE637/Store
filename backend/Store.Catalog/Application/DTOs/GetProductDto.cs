@@ -12,4 +12,5 @@ public record GetProductDto(
     Guid CategoryId,
     IReadOnlyDictionary<string, string> Specifications,
     int AvailableQuantity,
-    bool IsInStock);
+    bool IsInStock,
+    ProductImageDto? MainImage = null);

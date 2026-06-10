@@ -18,5 +18,13 @@ internal static class CartMappings
         items.Select(ToCartItemDto).ToList());
 
     private static CartItemDto ToCartItemDto(CartItem i) =>
-        new(i.CartItemId, i.ProductId, i.ProductName, i.Price, i.Quantity);
+        new(
+            i.CartItemId,
+            i.ProductId,
+            i.ProductName,
+            string.IsNullOrWhiteSpace(i.MainImageUrl)
+                ? null
+                : new CartItemImageDto(i.MainImageUrl, i.MainImageAltText ?? i.ProductName),
+            i.Price,
+            i.Quantity);
 }

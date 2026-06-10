@@ -49,16 +49,27 @@ public class Cart : AggregateRoot
 
     internal void LoadItems(IEnumerable<CartItem> items) => _items.AddRange(items);
 
-    public Result AddItem(Guid productId, string productName, decimal price, int quantity)
+    public Result AddItem(
+        Guid productId,
+        string productName,
+        decimal price,
+        int quantity,
+        string? mainImageUrl = null,
+        string? mainImageAltText = null)
     {
         if (IsCheckoutPending)
             return Result.Failure("Cart checkout is pending");
 
         var existing = _items.FirstOrDefault(i => i.ProductId == productId);
         if (existing != null)
-            return existing.RefreshProductInfoAndChangeQuantity(productName, price, existing.Quantity + quantity);
+            return existing.RefreshProductInfoAndChangeQuantity(
+                productName,
+                price,
+                existing.Quantity + quantity,
+                mainImageUrl,
+                mainImageAltText);
 
-        var itemResult = CartItem.Create(productId, productName, price, quantity);
+        var itemResult = CartItem.Create(productId, productName, price, quantity, mainImageUrl, mainImageAltText);
         if (itemResult.IsFailure)
             return Result.Failure(itemResult.Error);
 

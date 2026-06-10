@@ -15,6 +15,7 @@ public class CartRepository(CartDbContext context) : ICartRepository
         var entity = await context.Carts
             .AsNoTracking()
             .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(c => c.CustomerId == customerId);
 
         if (entity == null)
@@ -28,6 +29,7 @@ public class CartRepository(CartDbContext context) : ICartRepository
         var entities = await context.Carts
             .AsNoTracking()
             .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
             .Where(c => c.IsCheckoutPending && c.CheckoutPendingSince <= staleBefore)
             .ToListAsync();
 
@@ -100,7 +102,14 @@ public class CartRepository(CartDbContext context) : ICartRepository
             entity.CheckoutPendingSince);
 
         var items = entity.Items.Select(i =>
-            CartItem.Reconstitute(i.CartItemId, i.ProductId, i.ProductName, i.Price, i.Quantity));
+            CartItem.Reconstitute(
+                i.CartItemId,
+                i.ProductId,
+                i.ProductName,
+                i.Price,
+                i.Quantity,
+                i.Product.MainImageUrl,
+                i.Product.MainImageAltText));
 
         cart.LoadItems(items);
         return cart;

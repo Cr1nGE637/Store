@@ -8,11 +8,11 @@ public class CategoryTests
     [Fact]
     public void Create_WithValidElectronicsCode_CreatesCategory()
     {
-        var result = Category.Create(" Smartphones ", "smartphone");
+        var result = Category.Create(" Smartphones ", "smartphones");
 
         Assert.True(result.IsSuccess);
         Assert.Equal("Smartphones", result.Value.CategoryName);
-        Assert.Equal(ElectronicsCategoryCode.Smartphone, result.Value.CategoryCode);
+        Assert.Equal(ElectronicsCategoryCode.Smartphones, result.Value.CategoryCode);
     }
 
     [Fact]
@@ -27,12 +27,22 @@ public class CategoryTests
     [Fact]
     public void Update_WithValidElectronicsCode_ChangesNameAndCode()
     {
-        var category = Category.Create("Accessories", "Accessory").Value;
+        var category = Category.Create("Accessories", "Accessories").Value;
 
-        var result = category.Update("Peripherals", "Peripheral");
+        var result = category.Update("Peripherals", "Peripherals");
 
         Assert.True(result.IsSuccess);
         Assert.Equal("Peripherals", category.CategoryName);
-        Assert.Equal(ElectronicsCategoryCode.Peripheral, category.CategoryCode);
+        Assert.Equal(ElectronicsCategoryCode.Peripherals, category.CategoryCode);
+    }
+
+    [Fact]
+    public void Create_WithNewConsumerElectronicsCode_CreatesCategory()
+    {
+        var result = Category.Create("USB-C chargers", "chargers");
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("USB-C chargers", result.Value.CategoryName);
+        Assert.Equal(ElectronicsCategoryCode.Chargers, result.Value.CategoryCode);
     }
 }

@@ -2,11 +2,23 @@ namespace Store.Catalog.Domain.Enums;
 
 public enum ElectronicsCategoryCode
 {
-    Smartphone,
-    Laptop,
-    Storage,
-    GraphicsCard,
-    Monitor,
-    Peripheral,
-    Accessory
+    Processors,
+    Motherboards,
+    RAM,
+    SSD,
+    GraphicsCards,
+    PowerSupplies,
+    Laptops,
+    Smartphones,
+    Tablets,
+    Televisions,
+    Headphones,
+    Chargers,
+    CablesAdapters,
+    SmartWatches,
+    GameConsoles,
+    NetworkEquipment,
+    Accessories,
+    Peripherals,
+    Monitors
 }

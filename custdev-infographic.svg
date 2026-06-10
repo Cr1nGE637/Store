@@ -1,0 +1,77 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Инфографика по результатам кастдева StoreFit</title>
+  <desc id="desc">Сводная инфографика по пилотным интервью с представителями малого бизнеса в сфере электроники.</desc>
+  <rect width="1200" height="760" fill="#f6f7f9"/>
+
+  <text x="64" y="70" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#1f2937">Результаты кастдева StoreFit</text>
+  <text x="64" y="104" font-family="Arial, sans-serif" font-size="17" fill="#4b5563">Пилотные интервью с 12 представителями малого бизнеса в сфере электроники</text>
+
+  <rect x="64" y="140" width="320" height="220" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="88" y="174" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Кого опросили</text>
+  <text x="88" y="210" font-family="Arial, sans-serif" font-size="16" fill="#374151">Магазины комплектующих</text>
+  <rect x="88" y="224" width="248" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="88" y="224" width="145" height="16" rx="4" fill="#2563eb"/>
+  <text x="346" y="238" font-family="Arial, sans-serif" font-size="15" text-anchor="end" fill="#111827">5</text>
+  <text x="88" y="266" font-family="Arial, sans-serif" font-size="16" fill="#374151">Сервисные центры</text>
+  <rect x="88" y="280" width="248" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="88" y="280" width="116" height="16" rx="4" fill="#0f766e"/>
+  <text x="346" y="294" font-family="Arial, sans-serif" font-size="15" text-anchor="end" fill="#111827">4</text>
+  <text x="88" y="322" font-family="Arial, sans-serif" font-size="16" fill="#374151">Магазины аксессуаров</text>
+  <rect x="88" y="336" width="248" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="88" y="336" width="87" height="16" rx="4" fill="#f59e0b"/>
+  <text x="346" y="350" font-family="Arial, sans-serif" font-size="15" text-anchor="end" fill="#111827">3</text>
+
+  <rect x="416" y="140" width="320" height="220" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="440" y="174" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Основные боли</text>
+  <text x="440" y="210" font-family="Arial, sans-serif" font-size="16" fill="#374151">Повторяющиеся консультации</text>
+  <rect x="440" y="224" width="248" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="440" y="224" width="227" height="16" rx="4" fill="#dc2626"/>
+  <text x="698" y="238" font-family="Arial, sans-serif" font-size="15" text-anchor="end" fill="#111827">92%</text>
+  <text x="440" y="266" font-family="Arial, sans-serif" font-size="16" fill="#374151">Ошибки при выборе товара</text>
+  <rect x="440" y="280" width="248" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="440" y="280" width="207" height="16" rx="4" fill="#dc2626"/>
+  <text x="698" y="294" font-family="Arial, sans-serif" font-size="15" text-anchor="end" fill="#111827">83%</text>
+  <text x="440" y="322" font-family="Arial, sans-serif" font-size="16" fill="#374151">Зависимость от маркетплейсов</text>
+  <rect x="440" y="336" width="248" height="16" rx="4" fill="#e5e7eb"/>
+  <rect x="440" y="336" width="186" height="16" rx="4" fill="#dc2626"/>
+  <text x="698" y="350" font-family="Arial, sans-serif" font-size="15" text-anchor="end" fill="#111827">75%</text>
+
+  <rect x="768" y="140" width="368" height="220" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="792" y="174" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Как решают сейчас</text>
+  <circle cx="804" cy="211" r="6" fill="#2563eb"/>
+  <text x="824" y="216" font-family="Arial, sans-serif" font-size="16" fill="#374151">ручная консультация менеджера — 10 из 12</text>
+  <circle cx="804" cy="249" r="6" fill="#0f766e"/>
+  <text x="824" y="254" font-family="Arial, sans-serif" font-size="16" fill="#374151">переписка в мессенджерах — 8 из 12</text>
+  <circle cx="804" cy="287" r="6" fill="#f59e0b"/>
+  <text x="824" y="292" font-family="Arial, sans-serif" font-size="16" fill="#374151">личный опыт сотрудников — 7 из 12</text>
+  <circle cx="804" cy="325" r="6" fill="#7c3aed"/>
+  <text x="824" y="330" font-family="Arial, sans-serif" font-size="16" fill="#374151">таблицы и заметки — 4 из 12</text>
+
+  <rect x="64" y="392" width="352" height="246" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="88" y="426" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Интерес к StoreFit</text>
+  <path d="M240 467 L240 580" stroke="#e5e7eb" stroke-width="34" stroke-linecap="round"/>
+  <path d="M240 467 L240 580" stroke="#16a34a" stroke-width="34" stroke-linecap="round" stroke-dasharray="85 120"/>
+  <text x="240" y="530" font-family="Arial, sans-serif" font-size="42" font-weight="700" text-anchor="middle" fill="#111827">8/12</text>
+  <text x="240" y="559" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#4b5563">готовы тестировать MVP</text>
+  <text x="88" y="611" font-family="Arial, sans-serif" font-size="15" fill="#4b5563">Наибольший интерес показали магазины</text>
+  <text x="88" y="632" font-family="Arial, sans-serif" font-size="15" fill="#4b5563">комплектующих и сервисные центры.</text>
+
+  <rect x="448" y="392" width="320" height="246" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="472" y="426" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Приоритетные функции</text>
+  <text x="472" y="466" font-family="Arial, sans-serif" font-size="16" fill="#374151">1. Проверка совместимости</text>
+  <text x="472" y="502" font-family="Arial, sans-serif" font-size="16" fill="#374151">2. Подбор альтернатив</text>
+  <text x="472" y="538" font-family="Arial, sans-serif" font-size="16" fill="#374151">3. Рекомендации аксессуаров</text>
+  <text x="472" y="574" font-family="Arial, sans-serif" font-size="16" fill="#374151">4. Интеграция с учетом остатков</text>
+  <text x="472" y="612" font-family="Arial, sans-serif" font-size="15" fill="#4b5563">Функции выбраны по частоте упоминаний</text>
+
+  <rect x="800" y="392" width="336" height="246" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="824" y="426" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Вывод по сегментам</text>
+  <rect x="824" y="454" width="288" height="44" rx="6" fill="#dbeafe"/>
+  <text x="840" y="482" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1e3a8a">A: комплектующие и сервис</text>
+  <rect x="824" y="514" width="288" height="44" rx="6" fill="#ccfbf1"/>
+  <text x="840" y="542" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#134e4a">B: магазины электроники</text>
+  <rect x="824" y="574" width="288" height="44" rx="6" fill="#fef3c7"/>
+  <text x="840" y="602" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#78350f">C: простой ассортимент</text>
+
+  <text x="64" y="700" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">Примечание: данные представлены для пилотного кастдева и используются для обоснования гипотезы MVP.</text>
+</svg>

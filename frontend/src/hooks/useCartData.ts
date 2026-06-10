@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { queryKeys } from "../api/queryKeys";
@@ -34,9 +34,16 @@ function toGuestCart(items: CartItem[]): Cart {
   };
 }
 
-export function useCartData(auth: AuthSession, view: View, onNotice: (message: string) => void) {
+export function useCartData(
+  auth: AuthSession,
+  view: View,
+  onNotice: (message: string) => void,
+  syncAfterCheckout = false,
+  onCheckoutCartSynced?: () => void
+) {
   const [guestCartItems, setGuestCartItems] = useState<CartItem[]>(loadGuestCartItems);
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
+  const checkoutSyncStartedAt = useRef<number | null>(null);
   const queryClient = useQueryClient();
   const cartKey = queryKeys.cart(auth?.token);
 
@@ -44,7 +51,9 @@ export function useCartData(auth: AuthSession, view: View, onNotice: (message: s
     queryKey: cartKey,
     queryFn: api.cart,
     enabled: Boolean(auth),
-    refetchInterval: auth && view === "cart" ? 5000 : false
+    refetchInterval: auth && (view === "cart" || syncAfterCheckout)
+      ? (syncAfterCheckout ? 500 : 5000)
+      : false
   });
 
   const addToCart = useMutation({
@@ -78,6 +87,34 @@ export function useCartData(auth: AuthSession, view: View, onNotice: (message: s
     localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCartItems));
   }, [guestCartItems]);
 
+  useEffect(() => {
+    if (!syncAfterCheckout) {
+      checkoutSyncStartedAt.current = null;
+      return;
+    }
+
+    if (checkoutSyncStartedAt.current === null) {
+      checkoutSyncStartedAt.current = Date.now();
+    }
+
+    if (auth) {
+      void cart.refetch();
+    } else {
+      onCheckoutCartSynced?.();
+    }
+  }, [auth, cart.refetch, onCheckoutCartSynced, syncAfterCheckout]);
+
+  useEffect(() => {
+    if (!syncAfterCheckout || !auth || !cart.data || cart.isFetching) return;
+
+    const startedAt = checkoutSyncStartedAt.current;
+    if (!startedAt || cart.dataUpdatedAt < startedAt) return;
+
+    if (!cart.data.isCheckoutPending) {
+      onCheckoutCartSynced?.();
+    }
+  }, [auth, cart.data, cart.dataUpdatedAt, cart.isFetching, onCheckoutCartSynced, syncAfterCheckout]);
+
   async function syncGuestCartToAccount() {
     if (guestCartItems.length === 0) return;
 
@@ -107,6 +144,7 @@ export function useCartData(auth: AuthSession, view: View, onNotice: (message: s
             cartItemId: product.productId,
             productId: product.productId,
             productName: product.productName,
+            mainImage: product.mainImage ?? null,
             price: product.productPrice,
             quantity: 1
           }
@@ -152,18 +190,10 @@ export function useCartData(auth: AuthSession, view: View, onNotice: (message: s
     await removeCartItemMutation.mutateAsync(item.cartItemId);
   }
 
-  function clearAfterCheckout() {
-    queryClient.setQueryData<Cart | undefined>(cartKey, (current) => (
-      current ? { ...current, isCheckoutPending: false, items: [] } : current
-    ));
-    void queryClient.invalidateQueries({ queryKey: queryKeys.cartRoot });
-  }
-
   return {
     activeCart,
     addProduct,
     changeCartItemQuantity,
-    clearAfterCheckout,
     pendingProductId,
     removeCartItem,
     reloadCart: cart.refetch,

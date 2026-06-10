@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="ClosedXML" Version="0.104.2" />
         <PackageReference Include="coverlet.collector" Version="6.0.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -23,8 +24,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Store.App\Store.App.csproj" />
         <ProjectReference Include="..\Store.Carts\Store.Carts.csproj" />
         <ProjectReference Include="..\Store.Catalog\Store.Catalog.csproj" />
+        <ProjectReference Include="..\Store.Consulting\Store.Consulting.csproj" />
         <ProjectReference Include="..\Store.Identity\Store.Identity.csproj" />
         <ProjectReference Include="..\Store.Inventory\Store.Inventory.csproj" />
         <ProjectReference Include="..\Store.Notifications\Store.Notifications.csproj" />

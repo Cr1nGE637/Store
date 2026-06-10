@@ -1,0 +1,58 @@
+@startuml StoreArchitecture
+title Architecture of the online electronics store
+
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam ArrowColor #4b5563
+skinparam RectangleBorderColor #475569
+skinparam RectangleBackgroundColor #f8fafc
+skinparam DatabaseBackgroundColor #fdecc8
+skinparam DatabaseBorderColor #b7791f
+
+actor "Покупатель" as Customer
+actor "Менеджер" as Manager
+
+rectangle "WEB-интерфейс\nReact" as Web #f8fafc
+
+rectangle "Backend API\nASP.NET Core" as Api #dbeafe
+
+rectangle "Модульный монолит\nDDD + изолированная бизнес-логика" as Monolith #e0f2fe {
+  rectangle "Каталог" as Catalog #ffffff
+  rectangle "Корзина" as Cart #ffffff
+  rectangle "Заказы" as Orders #ffffff
+  rectangle "Склад" as Inventory #ffffff
+  rectangle "Пользователи" as Users #ffffff
+  rectangle "Уведомления" as Notifications #ffffff
+}
+
+database "PostgreSQL\nданные модулей" as Db
+
+cloud "Email / SMTP" as Email
+
+Customer -down-> Web
+Manager -down-> Web
+Web -right-> Api : HTTP / REST
+Api -down-> Monolith
+
+Monolith -right-> Db : чтение / запись
+
+Cart -right-> Orders : оформление заказа
+Orders -down-> Inventory : резервирование товара
+Orders -right-> Notifications : события заказа
+Users -right-> Notifications : регистрация
+Notifications -down-> Email : отправка писем
+
+Customer -[hidden]right- Manager
+Web -[hidden]right- Api
+Api -[hidden]right- Db
+Db -[hidden]down- Email
+
+note bottom of Monolith
+  Каждый модуль содержит собственные правила
+  и взаимодействует с другими модулями через события.
+end note
+
+@enduml

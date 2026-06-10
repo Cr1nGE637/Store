@@ -8,6 +8,7 @@ public class CatalogDbContext(DbContextOptions<CatalogDbContext> options) :  DbC
 {
     public DbSet<ProductEntity> Products { get; set; }
     public DbSet<ProductSpecificationEntity> ProductSpecifications { get; set; }
+    public DbSet<ProductImageEntity> ProductImages { get; set; }
     public DbSet<ProductAvailabilityEntity> ProductAvailabilities { get; set; }
     public DbSet<CategoryEntity> Categories { get; set; }
 

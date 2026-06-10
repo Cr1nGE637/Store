@@ -7,19 +7,36 @@ public class CartItem
     public Guid CartItemId { get; private set; }
     public Guid ProductId { get; private set; }
     public string ProductName { get; private set; }
+    public string? MainImageUrl { get; private set; }
+    public string? MainImageAltText { get; private set; }
     public decimal Price { get; private set; }
     public int Quantity { get; private set; }
 
-    private CartItem(Guid cartItemId, Guid productId, string productName, decimal price, int quantity)
+    private CartItem(
+        Guid cartItemId,
+        Guid productId,
+        string productName,
+        string? mainImageUrl,
+        string? mainImageAltText,
+        decimal price,
+        int quantity)
     {
         CartItemId = cartItemId;
         ProductId = productId;
         ProductName = productName;
+        MainImageUrl = mainImageUrl;
+        MainImageAltText = mainImageAltText;
         Price = price;
         Quantity = quantity;
     }
 
-    internal static Result<CartItem> Create(Guid productId, string productName, decimal price, int quantity)
+    internal static Result<CartItem> Create(
+        Guid productId,
+        string productName,
+        decimal price,
+        int quantity,
+        string? mainImageUrl = null,
+        string? mainImageAltText = null)
     {
         if (productId == Guid.Empty)
             return Result.Failure<CartItem>("ProductId is required");
@@ -33,11 +50,32 @@ public class CartItem
         if (quantity <= 0)
             return Result.Failure<CartItem>("Quantity must be greater than zero");
 
-        return Result.Success(new CartItem(Guid.NewGuid(), productId, productName, price, quantity));
+        return Result.Success(new CartItem(
+            Guid.NewGuid(),
+            productId,
+            productName,
+            NormalizeOptional(mainImageUrl),
+            NormalizeOptional(mainImageAltText),
+            price,
+            quantity));
     }
 
-    internal static CartItem Reconstitute(Guid id, Guid productId, string productName, decimal price, int quantity) =>
-        new(id, productId, productName, price, quantity);
+    internal static CartItem Reconstitute(
+        Guid id,
+        Guid productId,
+        string productName,
+        decimal price,
+        int quantity,
+        string? mainImageUrl = null,
+        string? mainImageAltText = null) =>
+        new(
+            id,
+            productId,
+            productName,
+            NormalizeOptional(mainImageUrl),
+            NormalizeOptional(mainImageAltText),
+            price,
+            quantity);
 
     internal Result ChangeQuantity(int quantity)
     {
@@ -48,7 +86,12 @@ public class CartItem
         return Result.Success();
     }
 
-    internal Result RefreshProductInfoAndChangeQuantity(string productName, decimal price, int quantity)
+    internal Result RefreshProductInfoAndChangeQuantity(
+        string productName,
+        decimal price,
+        int quantity,
+        string? mainImageUrl = null,
+        string? mainImageAltText = null)
     {
         if (string.IsNullOrWhiteSpace(productName))
             return Result.Failure("Product name is required");
@@ -61,7 +104,15 @@ public class CartItem
             return quantityResult;
 
         ProductName = productName;
+        MainImageUrl = NormalizeOptional(mainImageUrl);
+        MainImageAltText = NormalizeOptional(mainImageAltText);
         Price = price;
         return Result.Success();
+    }
+
+    private static string? NormalizeOptional(string? value)
+    {
+        var normalized = value?.Trim();
+        return string.IsNullOrWhiteSpace(normalized) ? null : normalized;
     }
 }

@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Store.EventOutbox.Infrastructure.Services;
 using Store.Inventory.Application.EventHandlers;
 using Store.Inventory.Application.Interfaces;
+using Store.Inventory.Application.Services;
+using Store.Inventory.Contracts;
 using Store.Inventory.Domain.Interfaces;
 using Store.Inventory.Infrastructure.DbContexts;
 using Store.Inventory.Infrastructure.Services;
@@ -28,6 +30,7 @@ public static class InventoryModule
             cfg.RegisterServicesFromAssembly(typeof(OrderStockReservationRequestedEventHandler).Assembly));
 
         services.AddScoped<IStockItemRepository, StockItemRepository>();
+        services.AddScoped<IInventoryStockWriter, InventoryStockWriter>();
         services.AddScoped<IInventoryUnitOfWork, UnitOfWork>();
         services.AddScoped<IInventoryDomainEventOutbox, InventoryDomainEventOutbox>();
         services.AddScoped<IInventoryDomainEventInbox, InventoryDomainEventInbox>();

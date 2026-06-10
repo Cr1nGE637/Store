@@ -1,11 +1,11 @@
-import { ArrowLeft, ShoppingCart } from "lucide-react";
-import { useMemo } from "react";
+import { ArrowLeft, ArrowRight, Lightbulb, ShoppingCart } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { api } from "../../api/client";
+import { api, resolveMediaUrl } from "../../api/client";
 import { queryKeys } from "../../api/queryKeys";
-import type { Cart, Category, Product } from "../../api/types";
+import type { Cart, Category, Product, ProductRecommendation } from "../../api/types";
 import { GhostButton, PrimaryButton } from "../../components/ui/buttons";
 import { EmptyState, FormError, Panel, PanelHeading, SoftBadge } from "../../components/ui/common";
 import { money } from "../../utils/format";
@@ -21,6 +21,7 @@ type ProductDetailsViewProps = {
 export function ProductDetailsView({ cart, categories, pendingProductId, onAdd }: ProductDetailsViewProps) {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const product = useQuery({
     queryKey: queryKeys.product(productId),
     queryFn: () => {
@@ -28,6 +29,22 @@ export function ProductDetailsView({ cart, categories, pendingProductId, onAdd }
       return api.product(productId);
     },
     enabled: Boolean(productId)
+  });
+  const productImages = useQuery({
+    queryKey: queryKeys.productImages(productId),
+    queryFn: () => {
+      if (!productId) throw new Error("Product id is missing");
+      return api.productImages(productId);
+    },
+    enabled: Boolean(productId && product.data)
+  });
+  const recommendations = useQuery({
+    queryKey: queryKeys.productRecommendations(productId),
+    queryFn: () => {
+      if (!productId) throw new Error("Product id is missing");
+      return api.productRecommendations(productId, 4);
+    },
+    enabled: Boolean(productId && product.data)
   });
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.categoryId, category.categoryName])),
@@ -42,6 +59,14 @@ export function ProductDetailsView({ cart, categories, pendingProductId, onAdd }
   const specs = Object.entries(item.specifications);
   const tone = stockTone(item.isInStock, item.availableQuantity);
   const isInCart = Boolean(cart?.items.some((cartItem) => cartItem.productId === item.productId));
+  const galleryImages = (productImages.data?.length ?? 0) > 0
+    ? productImages.data ?? []
+    : item.mainImage
+      ? [item.mainImage]
+      : [];
+  const activeImage = galleryImages.find((image) => image.productImageId === selectedImageId)
+    ?? galleryImages.find((image) => image.isMain)
+    ?? galleryImages[0];
 
   return (
     <ProductPage>
@@ -51,9 +76,29 @@ export function ProductDetailsView({ cart, categories, pendingProductId, onAdd }
 
       <DetailsPanel>
         <ProductVisual>
-          <DeviceScreen>
-            <span>{item.brand.slice(0, 2).toUpperCase()}</span>
-          </DeviceScreen>
+          <ImageStage>
+            {activeImage ? (
+              <ProductImage src={resolveMediaUrl(activeImage.url)} alt={activeImage.altText || item.productName} />
+            ) : (
+              <DeviceScreen>
+                <span>{item.brand.slice(0, 2).toUpperCase()}</span>
+              </DeviceScreen>
+            )}
+          </ImageStage>
+          {galleryImages.length > 1 && (
+            <ThumbnailStrip aria-label="Product images">
+              {galleryImages.map((image) => (
+                <ThumbnailButton
+                  key={image.productImageId}
+                  type="button"
+                  $active={image.productImageId === activeImage?.productImageId}
+                  onClick={() => setSelectedImageId(image.productImageId)}
+                >
+                  <img src={resolveMediaUrl(image.url)} alt={image.altText || item.productName} />
+                </ThumbnailButton>
+              ))}
+            </ThumbnailStrip>
+          )}
         </ProductVisual>
 
         <ProductInfo>
@@ -99,6 +144,13 @@ export function ProductDetailsView({ cart, categories, pendingProductId, onAdd }
         </ProductInfo>
       </DetailsPanel>
 
+      <RecommendationsPanel
+        error={recommendations.error}
+        isLoading={recommendations.isLoading}
+        onOpen={(recommendedProductId) => navigate(`/products/${recommendedProductId}`)}
+        recommendations={recommendations.data ?? []}
+      />
+
       <SpecsPanel>
         <PanelHeading>
           <div>
@@ -120,6 +172,49 @@ export function ProductDetailsView({ cart, categories, pendingProductId, onAdd }
   );
 }
 
+type RecommendationsPanelProps = {
+  error: unknown;
+  isLoading: boolean;
+  recommendations: ProductRecommendation[];
+  onOpen: (productId: string) => void;
+};
+
+function RecommendationsPanel({ error, isLoading, recommendations, onOpen }: RecommendationsPanelProps) {
+  return (
+    <SpecsPanel>
+      <PanelHeading>
+        <div>
+          <h2>Рекомендации консультанта</h2>
+          <p>Подходящие альтернативы и комплектующие на основе характеристик</p>
+        </div>
+        <SoftBadge>{isLoading ? "Проверка" : `${recommendations.length} шт.`}</SoftBadge>
+      </PanelHeading>
+
+      {error ? <FormError>{error instanceof Error ? error.message : "Не удалось загрузить рекомендации"}</FormError> : null}
+      {!error && isLoading && <RecommendationNotice>Ищу совместимые товары...</RecommendationNotice>}
+      {!error && !isLoading && recommendations.length === 0 && (
+        <RecommendationNotice>Для этого товара пока нет подходящих рекомендаций.</RecommendationNotice>
+      )}
+      {!error && recommendations.length > 0 && (
+        <RecommendationGrid>
+          {recommendations.map((recommendation) => (
+            <RecommendationCard key={`${recommendation.productId}-${recommendation.type}`}>
+              <Lightbulb size={18} />
+              <div>
+                <SoftBadge>{recommendation.type}</SoftBadge>
+                <p>{recommendation.reason}</p>
+              </div>
+              <GhostButton type="button" onClick={() => onOpen(recommendation.productId)}>
+                <ArrowRight size={16} /> Открыть
+              </GhostButton>
+            </RecommendationCard>
+          ))}
+        </RecommendationGrid>
+      )}
+    </SpecsPanel>
+  );
+}
+
 const ProductPage = styled.section`
   display: grid;
   gap: 16px;
@@ -137,11 +232,55 @@ const DetailsPanel = styled(Panel)`
 
 const ProductVisual = styled.div`
   display: grid;
+  align-content: stretch;
+  gap: 10px;
   min-height: 430px;
-  place-items: center;
+  overflow: hidden;
+  padding: 12px;
   background:
     linear-gradient(135deg, rgba(116, 211, 174, 0.24), rgba(226, 104, 81, 0.18)),
     #f5f8f7;
+`;
+
+const ImageStage = styled.div`
+  display: grid;
+  min-height: 330px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #ffffff;
+`;
+
+const ProductImage = styled.img`
+  width: 100%;
+  height: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  padding: 18px;
+`;
+
+const ThumbnailStrip = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+`;
+
+const ThumbnailButton = styled.button<{ $active: boolean }>`
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid ${({ $active }) => $active ? "#238466" : "#d8e0de"};
+  border-radius: 8px;
+  padding: 4px;
+  background: #ffffff;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 `;
 
 const DeviceScreen = styled.div`
@@ -271,5 +410,39 @@ const SpecLine = styled.div`
   strong {
     text-align: right;
     overflow-wrap: anywhere;
+  }
+`;
+
+const RecommendationNotice = styled.div`
+  border-radius: 8px;
+  padding: 12px;
+  color: #64736e;
+  background: #f4f7f6;
+  line-height: 1.4;
+`;
+
+const RecommendationGrid = styled.div`
+  display: grid;
+  gap: 10px;
+`;
+
+const RecommendationCard = styled.div`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #e4ebe8;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8faf9;
+
+  p {
+    margin: 8px 0 0;
+    color: #3f4d49;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr;
   }
 `;

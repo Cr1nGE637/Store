@@ -79,6 +79,38 @@ public class AddItemCommandHandlerTests
         Assert.Equal(2, item.Quantity);
     }
 
+    [Fact]
+    public async Task Handle_WhenProductCacheHasMainImage_ReturnsCartItemImage()
+    {
+        var customerId = Guid.NewGuid();
+        var product = new ProductInfo(
+            Guid.NewGuid(),
+            "Keyboard",
+            99.9m,
+            "/uploads/products/keyboard/image.jpg",
+            "Keyboard front view");
+        var handler = new AddItemCommandHandler(
+            new ConcurrentFakeCartRepository(),
+            new FakeProductCacheRepository([product]),
+            new FakeCartUnitOfWork());
+
+        var result = await handler.Handle(
+            new AddItemCommand
+            {
+                CustomerId = customerId,
+                ProductId = product.ProductId,
+                Quantity = 1
+            },
+            CancellationToken.None);
+
+        Assert.True(result.IsSuccess, result.IsFailure ? result.Error : string.Empty);
+        var item = Assert.Single(result.Value.Items);
+        Assert.NotNull(item.MainImage);
+        Assert.Equal(product.MainImageUrl, item.MainImage.Url);
+        Assert.Equal(product.MainImageAltText, item.MainImage.AltText);
+    }
+
+
     private sealed class ConcurrentFakeCartRepository : ICartRepository
     {
         private readonly object _sync = new();
@@ -162,6 +194,19 @@ public class AddItemCommandHandlerTests
                 return Task.FromResult(Result.Failure("Product not found"));
 
             _products[productId] = product with { Price = newPrice };
+            return Task.FromResult(Result.Success());
+        }
+
+        public Task<Result> UpdateMainImageAsync(Guid productId, string imageUrl, string altText)
+        {
+            if (!_products.TryGetValue(productId, out var product))
+                return Task.FromResult(Result.Failure("Product not found"));
+
+            _products[productId] = product with
+            {
+                MainImageUrl = imageUrl,
+                MainImageAltText = altText
+            };
             return Task.FromResult(Result.Success());
         }
 

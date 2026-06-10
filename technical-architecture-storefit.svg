@@ -1,0 +1,74 @@
+<svg width="1280" height="780" viewBox="0 0 1280 780" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Техническая архитектура StoreFit</title>
+  <desc id="desc">Схема технической части веб-приложения StoreFit с клиентским интерфейсом, API, доменными модулями, базой данных и внешними интеграциями.</desc>
+  <rect width="1280" height="780" fill="#f6f7f9"/>
+
+  <text x="64" y="66" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#111827">Техническая часть StoreFit</text>
+  <text x="64" y="100" font-family="Arial, sans-serif" font-size="17" fill="#4b5563">Модульное веб-приложение для онлайн-продажи электроники с цифровым консультантом</text>
+
+  <rect x="64" y="142" width="220" height="470" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="94" y="182" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Пользователи</text>
+  <rect x="94" y="220" width="160" height="62" rx="6" fill="#dbeafe"/>
+  <text x="174" y="246" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#1e3a8a">Покупатель</text>
+  <text x="174" y="266" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#1e40af">каталог и заказ</text>
+  <rect x="94" y="316" width="160" height="62" rx="6" fill="#ccfbf1"/>
+  <text x="174" y="342" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#134e4a">Менеджер</text>
+  <text x="174" y="362" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#0f766e">заказы и товары</text>
+  <rect x="94" y="412" width="160" height="62" rx="6" fill="#fef3c7"/>
+  <text x="174" y="438" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#78350f">Администратор</text>
+  <text x="174" y="458" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#92400e">правила и настройки</text>
+
+  <rect x="350" y="142" width="260" height="470" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="382" y="182" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Frontend</text>
+  <rect x="386" y="220" width="188" height="54" rx="6" fill="#eef2ff"/>
+  <text x="480" y="253" font-family="Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#3730a3">Каталог товаров</text>
+  <rect x="386" y="296" width="188" height="54" rx="6" fill="#eef2ff"/>
+  <text x="480" y="329" font-family="Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#3730a3">Карточка товара</text>
+  <rect x="386" y="372" width="188" height="54" rx="6" fill="#eef2ff"/>
+  <text x="480" y="405" font-family="Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#3730a3">Корзина и заказ</text>
+  <rect x="386" y="448" width="188" height="54" rx="6" fill="#eef2ff"/>
+  <text x="480" y="481" font-family="Arial, sans-serif" font-size="15" font-weight="700" text-anchor="middle" fill="#3730a3">Личный кабинет</text>
+
+  <rect x="676" y="142" width="344" height="470" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="708" y="182" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Backend API и домены</text>
+  <rect x="716" y="214" width="128" height="56" rx="6" fill="#e0f2fe"/>
+  <text x="780" y="247" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#075985">Catalog</text>
+  <rect x="876" y="214" width="128" height="56" rx="6" fill="#e0f2fe"/>
+  <text x="940" y="247" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#075985">Orders</text>
+  <rect x="716" y="298" width="128" height="56" rx="6" fill="#e0f2fe"/>
+  <text x="780" y="331" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#075985">Users</text>
+  <rect x="876" y="298" width="128" height="56" rx="6" fill="#e0f2fe"/>
+  <text x="940" y="331" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#075985">Cart</text>
+  <rect x="716" y="382" width="304" height="82" rx="6" fill="#dcfce7"/>
+  <text x="868" y="416" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#166534">Compatibility Engine</text>
+  <text x="868" y="440" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#166534">проверка правил, подбор альтернатив</text>
+  <rect x="716" y="496" width="304" height="56" rx="6" fill="#fef3c7"/>
+  <text x="868" y="529" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#78350f">Application Services</text>
+
+  <rect x="1070" y="142" width="166" height="470" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="1092" y="182" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Данные</text>
+  <rect x="1092" y="224" width="112" height="72" rx="6" fill="#f3f4f6" stroke="#cbd5e1"/>
+  <text x="1148" y="252" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#111827">База</text>
+  <text x="1148" y="272" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#4b5563">товары</text>
+  <rect x="1092" y="328" width="112" height="72" rx="6" fill="#f3f4f6" stroke="#cbd5e1"/>
+  <text x="1148" y="356" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#111827">Правила</text>
+  <text x="1148" y="376" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#4b5563">совместимость</text>
+  <rect x="1092" y="432" width="112" height="72" rx="6" fill="#f3f4f6" stroke="#cbd5e1"/>
+  <text x="1148" y="460" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#111827">Заказы</text>
+  <text x="1148" y="480" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#4b5563">клиенты</text>
+
+  <line x1="284" y1="376" x2="350" y2="376" stroke="#9ca3af" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="610" y1="376" x2="676" y2="376" stroke="#9ca3af" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1020" y1="376" x2="1070" y2="376" stroke="#9ca3af" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="64" y="650" width="1172" height="70" rx="8" fill="#ffffff" stroke="#d9dee7"/>
+  <text x="88" y="680" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#111827">Научно-техническое решение:</text>
+  <text x="338" y="680" font-family="Arial, sans-serif" font-size="16" fill="#374151">изолированная бизнес-логика по принципам DDD, правила совместимости, модульная структура и API.</text>
+  <text x="88" y="706" font-family="Arial, sans-serif" font-size="15" fill="#4b5563">Такой подход позволяет развивать цифрового консультанта отдельно от каталога, заказов и пользовательского интерфейса.</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,170 @@
+@startuml DatabaseLogicalSchema
+title Logical database schema
+
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam ArrowColor #4b5563
+skinparam ClassBorderColor #475569
+skinparam ClassBackgroundColor #f8fafc
+skinparam PackageBorderColor #64748b
+
+package "identity" {
+  class Users {
+    +Id : Guid
+    --
+    Name : string
+    Email : string
+    PasswordHash : string
+    Role : string
+  }
+}
+
+package "catalog" {
+  class Categories {
+    +CategoryId : Guid
+    --
+    CategoryName : string
+    CategoryCode : string
+  }
+
+  class Products {
+    +ProductId : Guid
+    --
+    Sku : string
+    ProductName : string
+    ProductPrice : decimal
+    ProductDescription : string
+    Brand : string
+    Model : string
+    WarrantyMonths : int
+    CategoryId : Guid
+  }
+
+  class ProductSpecifications {
+    +ProductId : Guid
+    +Name : string
+    --
+    Value : string
+  }
+
+  class ProductAvailability {
+    +ProductId : Guid
+    --
+    AvailableQuantity : int
+    UpdatedOnUtc : DateTime
+  }
+}
+
+package "cart" {
+  class ProductCache {
+    +ProductId : Guid
+    --
+    ProductName : string
+    Price : decimal
+    IsAvailable : bool
+  }
+
+  class Carts {
+    +CartId : Guid
+    --
+    CustomerId : Guid
+    IsCheckoutPending : bool
+    PendingCheckoutId : Guid?
+    CheckoutPendingSince : DateTimeOffset?
+  }
+
+  class CartItems {
+    +CartItemId : Guid
+    --
+    CartId : Guid
+    ProductId : Guid
+    ProductName : string
+    Price : decimal
+    Quantity : int
+  }
+}
+
+package "ordering" {
+  class Orders {
+    +OrderId : Guid
+    --
+    SourceCheckoutId : Guid?
+    CustomerId : Guid
+    CustomerEmail : string
+    RecipientName : string
+    Phone : string
+    PaymentMethod : string
+    Status : OrderStatus
+    CreatedAt : DateTime
+    PaidAt : DateTime?
+    CancelledAt : DateTime?
+    RejectedAt : DateTime?
+  }
+
+  class OrderedProducts {
+    +OrderedProductId : Guid
+    --
+    OrderId : Guid
+    ProductId : Guid
+    ProductName : string
+    Price : decimal
+    Quantity : int
+  }
+}
+
+package "inventory" {
+  class StockItems {
+    +Id : Guid
+    --
+    ProductId : Guid
+    Quantity : int
+    Reserved : int
+    Version : uint
+  }
+
+  class StockReservations {
+    +Id : Guid
+    --
+    StockItemId : Guid
+    OrderId : Guid
+    Quantity : int
+  }
+}
+
+package "notifications" {
+  class OutboxMessages {
+    +Id : Guid
+    --
+    To : string
+    Subject : string
+    Body : string
+    DedupeKey : string?
+    CreatedAt : DateTime
+    ProcessedAt : DateTime?
+    AttemptCount : int
+    IsDeadLettered : bool
+  }
+}
+
+Categories "1" -- "0..*" Products : contains
+Products "1" -- "0..*" ProductSpecifications : has
+Products "1" -- "0..1" ProductAvailability : availability
+
+Carts "1" -- "0..*" CartItems : contains
+ProductCache "1" -- "0..*" CartItems : cached product
+
+Orders "1" -- "1..*" OrderedProducts : contains
+StockItems "1" -- "0..*" StockReservations : reserves
+
+note bottom
+  На схеме показаны физические связи внутри модулей.
+  Между разными схемами прямые внешние ключи не используются:
+  модули связываются логически по идентификаторам и через события.
+  Служебные таблицы outbox/inbox не показаны.
+end note
+
+@enduml

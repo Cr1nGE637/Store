@@ -19,19 +19,24 @@ namespace Store.Catalog.Infrastructure.Migrations
                 type: "character varying(50)",
                 maxLength: 50,
                 nullable: false,
-                defaultValue: "Accessory");
+                defaultValue: "Accessories");
 
             migrationBuilder.Sql(
                 """
                 UPDATE catalog."Categories"
                 SET "CategoryCode" = CASE lower(btrim("CategoryName"))
-                    WHEN 'smartphones' THEN 'Smartphone'
-                    WHEN 'laptops' THEN 'Laptop'
-                    WHEN 'storage' THEN 'Storage'
-                    WHEN 'graphics cards' THEN 'GraphicsCard'
-                    WHEN 'monitors' THEN 'Monitor'
-                    WHEN 'peripherals' THEN 'Peripheral'
-                    WHEN 'accessories' THEN 'Accessory'
+                    WHEN 'processors' THEN 'Processors'
+                    WHEN 'motherboards' THEN 'Motherboards'
+                    WHEN 'ram' THEN 'RAM'
+                    WHEN 'ssd' THEN 'SSD'
+                    WHEN 'storage' THEN 'SSD'
+                    WHEN 'graphics cards' THEN 'GraphicsCards'
+                    WHEN 'power supplies' THEN 'PowerSupplies'
+                    WHEN 'laptops' THEN 'Laptops'
+                    WHEN 'smartphones' THEN 'Smartphones'
+                    WHEN 'accessories' THEN 'Accessories'
+                    WHEN 'peripherals' THEN 'Peripherals'
+                    WHEN 'monitors' THEN 'Monitors'
                     ELSE "CategoryCode"
                 END;
                 """);

@@ -1,5 +1,6 @@
 using CSharpFunctionalExtensions;
 using Store.Catalog.Application.CQRS.Query;
+using Store.Catalog.Application.DTOs;
 using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
 using Store.Catalog.Domain.Interfaces;
@@ -12,7 +13,10 @@ public class CatalogProductQueryTests
     public async Task GetProductsQueryHandler_PassesElectronicsFiltersToRepository()
     {
         var repository = new CapturingProductRepository();
-        var handler = new GetProductsQueryHandler(repository, new FakeProductAvailabilityRepository());
+        var handler = new GetProductsQueryHandler(
+            repository,
+            new FakeProductAvailabilityRepository(),
+            new FakeProductImageRepository());
 
         var result = await handler.Handle(
             new GetProductsQuery
@@ -25,7 +29,7 @@ public class CatalogProductQueryTests
                 InStockOnly = true,
                 Page = 2,
                 PageSize = 10,
-                SpecificationFilters = new Dictionary<string, string> { ["Processor"] = "Ryzen 7" }
+                SpecificationFilters = new Dictionary<string, string> { [" form_factor "] = " ATX " }
             },
             CancellationToken.None);
 
@@ -38,7 +42,7 @@ public class CatalogProductQueryTests
         Assert.True(repository.LastCriteria.InStockOnly);
         Assert.Equal(10, repository.LastCriteria.Skip);
         Assert.Equal(10, repository.LastCriteria.Take);
-        Assert.Equal("Ryzen 7", repository.LastCriteria.SpecificationFilters["Processor"]);
+        Assert.Equal("ATX", repository.LastCriteria.SpecificationFilters["formFactor"]);
     }
 
     [Fact]
@@ -46,7 +50,8 @@ public class CatalogProductQueryTests
     {
         var handler = new GetProductsQueryHandler(
             new CapturingProductRepository(),
-            new FakeProductAvailabilityRepository());
+            new FakeProductAvailabilityRepository(),
+            new FakeProductImageRepository());
 
         var result = await handler.Handle(
             new GetProductsQuery { MinPrice = 100m, MaxPrice = 50m },
@@ -60,7 +65,10 @@ public class CatalogProductQueryTests
     public async Task GetProductsQueryHandler_WhenSpecificationFiltersContainEmptyValues_IgnoresThem()
     {
         var repository = new CapturingProductRepository();
-        var handler = new GetProductsQueryHandler(repository, new FakeProductAvailabilityRepository());
+        var handler = new GetProductsQueryHandler(
+            repository,
+            new FakeProductAvailabilityRepository(),
+            new FakeProductImageRepository());
 
         var result = await handler.Handle(
             new GetProductsQuery
@@ -68,9 +76,9 @@ public class CatalogProductQueryTests
                 SpecificationFilters = new Dictionary<string, string>
                 {
                     [""] = "ignored",
-                    ["Memory"] = "",
-                    ["Processor"] = null!,
-                    ["Display"] = "  15.6  "
+                    ["memoryType"] = "",
+                    ["socket"] = null!,
+                    ["PowerConsumptionWatts"] = "  65  "
                 }
             },
             CancellationToken.None);
@@ -78,7 +86,7 @@ public class CatalogProductQueryTests
         Assert.True(result.IsSuccess);
         Assert.NotNull(repository.LastCriteria);
         Assert.Single(repository.LastCriteria.SpecificationFilters);
-        Assert.Equal("15.6", repository.LastCriteria.SpecificationFilters["Display"]);
+        Assert.Equal("65", repository.LastCriteria.SpecificationFilters["powerConsumptionWatts"]);
     }
 
     private sealed class FakeProductAvailabilityRepository : IProductAvailabilityRepository
@@ -90,6 +98,48 @@ public class CatalogProductQueryTests
 
         public Task UpsertAsync(Guid productId, int availableQuantity, CancellationToken cancellationToken) =>
             Task.CompletedTask;
+    }
+
+    private sealed class FakeProductImageRepository : IProductImageRepository
+    {
+        public Task AddAsync(ProductImage image, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task ClearMainImageAsync(Guid productId, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task<int> GetNextDisplayOrderAsync(Guid productId, CancellationToken cancellationToken) =>
+            Task.FromResult(0);
+
+        public Task<Result<ProductImageDto>> GetByIdAsync(Guid productImageId, CancellationToken cancellationToken) =>
+            Task.FromResult(Result.Failure<ProductImageDto>("Product image not found"));
+
+        public Task<IReadOnlyCollection<ProductImageDto>> GetByProductIdAsync(
+            Guid productId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyCollection<ProductImageDto>>([]);
+
+        public Task<Result<ProductImageDto>> DeleteAsync(
+            Guid productId,
+            Guid productImageId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(Result.Failure<ProductImageDto>("Product image not found"));
+
+        public Task<Result<ProductImageDto>> SetMainAsync(
+            Guid productId,
+            Guid productImageId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(Result.Failure<ProductImageDto>("Product image not found"));
+
+        public Task<Result<ProductImageDto?>> SetFirstAvailableAsMainAsync(
+            Guid productId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(Result.Success<ProductImageDto?>(null));
+
+        public Task<IReadOnlyDictionary<Guid, ProductImageDto>> GetMainImagesAsync(
+            IReadOnlyCollection<Guid> productIds,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, ProductImageDto>>(new Dictionary<Guid, ProductImageDto>());
     }
 
     private sealed class CapturingProductRepository : IProductRepository

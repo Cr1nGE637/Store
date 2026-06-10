@@ -17,6 +17,12 @@ public class ProductCacheConfiguration : IEntityTypeConfiguration<ProductCacheEn
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(p => p.MainImageUrl)
+            .HasMaxLength(500);
+
+        builder.Property(p => p.MainImageAltText)
+            .HasMaxLength(200);
+
         builder.Property(p => p.Price)
             .IsRequired()
             .HasColumnType("numeric(18,2)");

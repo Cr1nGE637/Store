@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Store.Carts.Infrastructure.DbContexts;
 using Store.Catalog.Infrastructure.DbContexts;
+using Store.Consulting.Infrastructure.DbContexts;
 using Store.Identity.Infrastructure.DbContexts;
 using Store.Inventory.Infrastructure.DbContexts;
 using Store.Notifications.Infrastructure.DbContexts;
@@ -103,6 +104,14 @@ public sealed class MigrationSmokeTests
                     npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "notifications"))
                 .Options);
         await notifications.Database.MigrateAsync();
+
+        await using var consulting = new ConsultingDbContext(
+            new DbContextOptionsBuilder<ConsultingDbContext>()
+                .UseNpgsql(
+                    WithSearchPath(databaseConnectionString, "consulting"),
+                    npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", "consulting"))
+                .Options);
+        await consulting.Database.MigrateAsync();
     }
 
     private static string WithSearchPath(string connectionString, string schema)
@@ -123,6 +132,7 @@ public sealed class MigrationSmokeTests
         await AssertTableExistsAsync(connection, "identity", "Users");
         await AssertTableExistsAsync(connection, "catalog", "Categories");
         await AssertTableExistsAsync(connection, "catalog", "Products");
+        await AssertTableExistsAsync(connection, "catalog", "ProductImages");
         await AssertTableExistsAsync(connection, "cart", "Carts");
         await AssertTableExistsAsync(connection, "cart", "CartItems");
         await AssertTableExistsAsync(connection, "cart", "ProductCache");
@@ -134,6 +144,9 @@ public sealed class MigrationSmokeTests
         await AssertTableExistsAsync(connection, "inventory", "processed_domain_events");
         await AssertTableExistsAsync(connection, "notifications", "outbox_messages");
         await AssertTableExistsAsync(connection, "notifications", "processed_domain_events");
+        await AssertTableExistsAsync(connection, "consulting", "CompatibilityRules");
+        await AssertTableExistsAsync(connection, "consulting", "ConsultationResults");
+        await AssertTableExistsAsync(connection, "consulting", "RecommendationEvents");
         await AssertTableMissingAsync(connection, "public", "StockItems");
         await AssertTableMissingAsync(connection, "public", "outbox_messages");
     }

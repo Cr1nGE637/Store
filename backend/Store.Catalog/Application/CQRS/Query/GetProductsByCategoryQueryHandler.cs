@@ -12,15 +12,18 @@ public class GetProductsByCategoryQueryHandler : IRequestHandler<GetProductsByCa
     private readonly IProductRepository _productRepository;
     private readonly ICategoryRepository _categoryRepository;
     private readonly IProductAvailabilityRepository _availabilityRepository;
+    private readonly IProductImageRepository _imageRepository;
 
     public GetProductsByCategoryQueryHandler(
         IProductRepository productRepository,
         ICategoryRepository categoryRepository,
-        IProductAvailabilityRepository availabilityRepository)
+        IProductAvailabilityRepository availabilityRepository,
+        IProductImageRepository imageRepository)
     {
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
         _availabilityRepository = availabilityRepository;
+        _imageRepository = imageRepository;
     }
 
     public async Task<Result<List<GetProductDto>>> Handle(GetProductsByCategoryQuery request, CancellationToken cancellationToken)
@@ -43,11 +46,15 @@ public class GetProductsByCategoryQueryHandler : IRequestHandler<GetProductsByCa
         var availability = await _availabilityRepository.GetAvailableQuantitiesAsync(
             productsResult.Value.Select(product => product.ProductId).ToArray(),
             cancellationToken);
+        var mainImages = await _imageRepository.GetMainImagesAsync(
+            productsResult.Value.Select(product => product.ProductId).ToArray(),
+            cancellationToken);
 
         return Result.Success(productsResult.Value
             .Select(product => CatalogMappings.ToGetProductDto(
                 product,
-                availability.GetValueOrDefault(product.ProductId)))
+                availability.GetValueOrDefault(product.ProductId),
+                mainImages.GetValueOrDefault(product.ProductId)))
             .ToList());
     }
 }

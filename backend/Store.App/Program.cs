@@ -13,6 +13,9 @@ using Store.Inventory;
 using Store.Inventory.Infrastructure.DbContexts;
 using Store.Notifications;
 using Store.Notifications.Infrastructure.DbContexts;
+using Store.Consulting;
+using Store.Consulting.Infrastructure.DbContexts;
+using Store.App.Application;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
@@ -56,6 +59,8 @@ builder.Services.AddCartModule(builder.Configuration);
 builder.Services.AddOrderingModule(builder.Configuration);
 builder.Services.AddInventoryModule(builder.Configuration);
 builder.Services.AddNotificationsModule(builder.Configuration);
+builder.Services.AddConsultingModule(builder.Configuration);
+builder.Services.AddScoped<ProductImportOrchestrator>();
 
 var app = builder.Build();
 
@@ -80,6 +85,8 @@ app.UseCookiePolicy(new CookiePolicyOptions
 app.UseStoreRequestLogging();
 app.UseRateLimiter();
 app.UseCors(ApiExtensions.CorsPolicyName);
+app.UseStaticFiles();
+app.UseProductImageStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -96,6 +103,7 @@ using (var scope = app.Services.CreateScope())
     await services.ApplyMigrationsAsync<OrderingDbContext>();
     await services.ApplyMigrationsAsync<InventoryDbContext>();
     await services.ApplyMigrationsAsync<NotificationsDbContext>();
+    await services.ApplyMigrationsAsync<ConsultingDbContext>();
     await services.SeedDemoElectronicsAsync();
     await services.SyncCartProductCacheAsync();
 }

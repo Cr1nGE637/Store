@@ -1,3 +1,8 @@
 namespace Store.Carts.Domain.ValueObjects;
 
-public record ProductInfo(Guid ProductId, string ProductName, decimal Price);
+public record ProductInfo(
+    Guid ProductId,
+    string ProductName,
+    decimal Price,
+    string? MainImageUrl = null,
+    string? MainImageAltText = null);

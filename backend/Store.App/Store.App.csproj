@@ -25,6 +25,7 @@
       <ProjectReference Include="..\Store.Catalog\Store.Catalog.csproj" />
       <ProjectReference Include="..\Store.Identity\Store.Identity.csproj" />
       <ProjectReference Include="..\Store.Notifications\Store.Notifications.csproj" />
+      <ProjectReference Include="..\Store.Consulting\Store.Consulting.csproj" />
     </ItemGroup>
 
     <ItemGroup>

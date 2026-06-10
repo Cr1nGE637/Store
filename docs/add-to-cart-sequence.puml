@@ -1,0 +1,55 @@
+@startuml AddToCartSequence
+title Add product to cart scenario
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceArrowThickness 1
+skinparam ParticipantBorderColor #475569
+skinparam ParticipantBackgroundColor #f8fafc
+skinparam DatabaseBackgroundColor #fdecc8
+skinparam DatabaseBorderColor #b7791f
+
+actor "Покупатель" as Customer
+participant "WEB-интерфейс" as Web
+participant "Backend API" as Api
+participant "Модуль корзины" as Cart
+participant "Product Cache" as ProductCache
+database "PostgreSQL" as Db
+
+Customer -> Web : нажимает "В корзину"
+Web -> Api : POST /Cart/items\nproductId, quantity, JWT
+
+Api -> Api : проверить авторизацию\nи получить customerId
+Api -> Cart : AddItemCommand
+
+Cart -> ProductCache : получить данные товара
+ProductCache -> Db : поиск товара в кэше
+Db --> ProductCache : название, цена, доступность
+
+alt товар доступен
+  ProductCache --> Cart : данные товара
+  Cart -> Cart : заблокировать корзину\nна время изменения
+  Cart -> Db : получить корзину покупателя
+
+  alt корзина уже существует
+    Db --> Cart : текущая корзина
+    Cart -> Cart : добавить товар\nили увеличить количество
+    Cart -> Db : обновить корзину
+  else корзины нет
+    Db --> Cart : корзина не найдена
+    Cart -> Cart : создать новую корзину
+    Cart -> Cart : добавить товар
+    Cart -> Db : сохранить корзину
+  end
+
+  Cart --> Api : обновленная корзина
+  Api --> Web : 200 OK + Cart
+  Web --> Customer : товар добавлен
+else товар не найден или недоступен
+  ProductCache --> Cart : ошибка
+  Cart --> Api : Product not found or unavailable
+  Api --> Web : 400 Bad Request
+  Web --> Customer : показать ошибку
+end
+
+@enduml

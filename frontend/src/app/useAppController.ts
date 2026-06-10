@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api, session } from "../api/client";
@@ -19,19 +19,23 @@ export function useAppController() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const view = viewFromPath(location.pathname);
+  const [isCheckoutCartSyncing, setCheckoutCartSyncing] = useState(false);
 
   const catalog = useCatalogData(view);
   const adminCatalog = useAdminCatalogData(auth, view);
-  const cart = useCartData(auth, view, setNotice);
-  const orders = useOrdersData(auth, view);
+  const stopCheckoutCartSync = useCallback(() => {
+    setCheckoutCartSyncing(false);
+  }, []);
+  const cart = useCartData(auth, view, setNotice, isCheckoutCartSyncing, stopCheckoutCartSync);
+  const reloadCartFromServer = useCallback(() => {
+    void cart.reloadCart();
+  }, [cart.reloadCart]);
+  const orders = useOrdersData(auth, view, reloadCartFromServer);
 
   const checkoutMutation = useMutation({
     mutationFn: api.checkout,
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.cartRoot }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.ordersRoot })
-      ]);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.ordersRoot });
     }
   });
 
@@ -42,6 +46,7 @@ export function useAppController() {
   async function handleLogout() {
     await api.logout();
     setAuth(null);
+    setCheckoutCartSyncing(false);
     orders.clearPendingCheckout();
     navigate("/");
     setNotice("Вы вышли из аккаунта");
@@ -65,8 +70,8 @@ export function useAppController() {
     }
 
     await checkoutMutation.mutateAsync(payload);
+    setCheckoutCartSyncing(true);
     orders.markCheckoutPending();
-    cart.clearAfterCheckout();
     navigate("/orders");
     setNotice("Заказ отправлен в обработку");
     void orders.reloadOrders();

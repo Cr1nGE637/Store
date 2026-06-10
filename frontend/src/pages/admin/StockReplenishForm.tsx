@@ -6,18 +6,20 @@ import { queryKeys } from "../../api/queryKeys";
 import type { Product } from "../../api/types";
 import { PrimaryButton } from "../../components/ui/buttons";
 import { FormError } from "../../components/ui/common";
-import { AdminForm } from "./admin.styles";
+import { AdminForm, AdminInlineForm } from "./admin.styles";
 
 type StockReplenishFormProps = {
   products: Product[];
   onChanged: () => Promise<unknown>;
+  embedded?: boolean;
 };
 
-export function StockReplenishForm({ products, onChanged }: StockReplenishFormProps) {
+export function StockReplenishForm({ products, onChanged, embedded = false }: StockReplenishFormProps) {
   const [productId, setProductId] = useState("");
   const [amount, setAmount] = useState(10);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const FormShell = embedded ? AdminInlineForm : AdminForm;
   const queryClient = useQueryClient();
   const replenishStock = useMutation({
     mutationFn: ({ nextProductId, nextAmount }: { nextProductId: string; nextAmount: number }) => api.replenish(nextProductId, nextAmount),
@@ -75,7 +77,7 @@ export function StockReplenishForm({ products, onChanged }: StockReplenishFormPr
   }
 
   return (
-    <AdminForm onSubmit={replenish}>
+    <FormShell onSubmit={replenish}>
       <h2>Остатки</h2>
       <select value={productId} onChange={(event) => setProductId(event.target.value)} disabled={products.length === 0}>
         <option value="">Выберите товар</option>
@@ -95,6 +97,6 @@ export function StockReplenishForm({ products, onChanged }: StockReplenishFormPr
       <PrimaryButton type="submit" disabled={isSubmitting || products.length === 0 || !productId || amount < 1}>
         <Boxes size={18} /> {isSubmitting ? "Обновляю..." : "Пополнить склад"}
       </PrimaryButton>
-    </AdminForm>
+    </FormShell>
   );
 }

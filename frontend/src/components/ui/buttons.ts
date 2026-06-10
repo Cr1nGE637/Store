@@ -33,7 +33,7 @@ export const PrimaryButton = styled.button`
   }
 
   &:disabled {
-    cursor: wait;
+    cursor: not-allowed;
     opacity: 0.58;
   }
 `;
@@ -70,7 +70,7 @@ export const GhostButton = styled.button`
   }
 
   &:disabled {
-    cursor: wait;
+    cursor: not-allowed;
     opacity: 0.58;
   }
 `;

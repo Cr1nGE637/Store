@@ -1,0 +1,67 @@
+@startuml GeneralSystemStructure
+title Общая структура проектируемой системы
+
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam ArrowColor #4b5563
+skinparam RectangleBorderColor #475569
+skinparam RectangleBackgroundColor #f8fafc
+skinparam PackageBorderColor #64748b
+skinparam PackageBackgroundColor #f8fafc
+skinparam DatabaseBackgroundColor #fdecc8
+skinparam DatabaseBorderColor #b7791f
+
+actor "Покупатель" as Customer
+actor "Менеджер" as Manager
+
+package "Клиентская часть" as Client #e0f2fe {
+  rectangle "Пользовательский интерфейс\nпокупателя" as CustomerUi #ffffff
+  rectangle "Административный\nинтерфейс менеджера" as ManagerUi #ffffff
+}
+
+package "Серверная часть" as Server #dbeafe {
+  rectangle "HTTP API" as Api #ffffff
+  rectangle "Проверка доступа\nи ролей" as Access #ffffff
+  rectangle "Бизнес-правила\nмагазина" as Rules #ffffff
+  rectangle "Модули приложения" as Modules #ffffff {
+    rectangle "Каталог" as Catalog #ffffff
+    rectangle "Корзина" as Cart #ffffff
+    rectangle "Заказы" as Orders #ffffff
+    rectangle "Склад" as Inventory #ffffff
+    rectangle "Совместимость" as Compatibility #ffffff
+    rectangle "Уведомления" as Notifications #ffffff
+  }
+}
+
+database "Хранилище данных\n\nПользователи\nТовары и категории\nХарактеристики\nКорзины и заказы\nОстатки и резервы\nУведомления\nПравила совместимости" as Storage
+
+Customer --> CustomerUi : действия пользователя
+Manager --> ManagerUi : управление данными
+
+CustomerUi --> Api : HTTP-запросы
+ManagerUi --> Api : HTTP-запросы
+
+Api --> Access : проверка прав
+Access --> Rules : разрешенные операции
+Rules --> Modules : выполнение сценариев
+Modules --> Storage : чтение и запись данных
+
+Storage --> Modules : состояние системы
+Modules --> Api : результат операции
+Api --> CustomerUi : данные каталога,\nкорзины и заказа
+Api --> ManagerUi : данные для\nадминистрирования
+
+Customer -[hidden]down- Manager
+Client -[hidden]right- Server
+Server -[hidden]right- Storage
+
+note bottom of Storage
+  Пользователи не обращаются к хранилищу напрямую.
+  Все операции проходят через серверную часть.
+end note
+
+@enduml

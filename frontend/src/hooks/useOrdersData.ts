@@ -10,7 +10,7 @@ type AuthSession = {
   token: string;
 } | null;
 
-export function useOrdersData(auth: AuthSession, view: View) {
+export function useOrdersData(auth: AuthSession, view: View, onCheckoutOrderDetected?: () => void) {
   const [pendingCheckoutStartedAt, setPendingCheckoutStartedAt] = useState<number | null>(null);
 
   const orders = useQuery({
@@ -30,8 +30,9 @@ export function useOrdersData(auth: AuthSession, view: View) {
 
     if (hasNewOrder) {
       setPendingCheckoutStartedAt(null);
+      onCheckoutOrderDetected?.();
     }
-  }, [orders.data, pendingCheckoutStartedAt]);
+  }, [onCheckoutOrderDetected, orders.data, pendingCheckoutStartedAt]);
 
   return {
     clearPendingCheckout: () => setPendingCheckoutStartedAt(null),

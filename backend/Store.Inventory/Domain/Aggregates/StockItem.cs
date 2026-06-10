@@ -66,6 +66,16 @@ public class StockItem : AggregateRoot
         return Result.Success();
     }
 
+    public Result SetAvailableQuantity(int availableQuantity)
+    {
+        if (availableQuantity < 0)
+            return Result.Failure("Available quantity cannot be negative");
+
+        Quantity = Reserved + availableQuantity;
+        RaiseStockChangedEvent();
+        return Result.Success();
+    }
+
     public Result Reserve(Guid orderId, int amount)
     {
         if (orderId == Guid.Empty)

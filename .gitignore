@@ -53,5 +53,9 @@ desktop.ini
 *.log
 logs/
 
+# Uploaded product images
+backend/Store.App/wwwroot/uploads/products/*
+!backend/Store.App/wwwroot/uploads/products/.gitkeep
+
 # Frontend
 node_modules/

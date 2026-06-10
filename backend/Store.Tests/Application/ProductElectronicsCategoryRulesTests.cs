@@ -12,7 +12,7 @@ public class ProductElectronicsCategoryRulesTests
     [Fact]
     public async Task CreateProduct_WhenRequiredCategorySpecificationIsMissing_ReturnsFailure()
     {
-        var category = Category.Create("Smartphones", "Smartphone").Value;
+        var category = Category.Create("Motherboards", "Motherboards").Value;
         var productRepository = new FakeProductRepository();
         var handler = new CreateProductCommandHandler(
             productRepository,
@@ -23,31 +23,32 @@ public class ProductElectronicsCategoryRulesTests
         var result = await handler.Handle(
             new CreateProductCommand
             {
-                Sku = "APL-IP15-128-BLK",
-                ProductName = "Apple iPhone 15",
-                ProductDescription = "Smartphone",
-                ProductPrice = 79990m,
-                Brand = "Apple",
-                Model = "iPhone 15",
-                WarrantyMonths = 12,
+                Sku = "ASU-B650-PLUS",
+                ProductName = "ASUS TUF Gaming B650-Plus",
+                ProductDescription = "AM5 motherboard",
+                ProductPrice = 21990m,
+                Brand = "ASUS",
+                Model = "TUF Gaming B650-Plus",
+                WarrantyMonths = 36,
                 CategoryId = category.CategoryId,
                 Specifications = new Dictionary<string, string>
                 {
-                    ["display"] = "6.1 inch",
-                    ["processor"] = "A16 Bionic"
+                    ["socket"] = "AM5",
+                    ["formFactor"] = "ATX",
+                    ["chipset"] = "B650"
                 }
             },
             CancellationToken.None);
 
         Assert.True(result.IsFailure);
-        Assert.Contains("memory", result.Error);
+        Assert.Contains("memoryType", result.Error);
         Assert.Empty(productRepository.Products);
     }
 
     [Fact]
     public async Task CreateProduct_WhenCategorySpecificationSetIsComplete_CreatesProduct()
     {
-        var category = Category.Create("Monitors", "Monitor").Value;
+        var category = Category.Create("Monitors", "Monitors").Value;
         var productRepository = new FakeProductRepository();
         var handler = new CreateProductCommandHandler(
             productRepository,
@@ -68,9 +69,11 @@ public class ProductElectronicsCategoryRulesTests
                 CategoryId = category.CategoryId,
                 Specifications = new Dictionary<string, string>
                 {
-                    ["display"] = "27 inch",
+                    ["screenSize"] = "27",
                     ["resolution"] = "2560x1440",
-                    ["refresh_rate"] = "165Hz"
+                    ["refreshRate"] = "165Hz",
+                    ["interface"] = "HDMI 2.1, DisplayPort 1.4",
+                    ["connectorType"] = "HDMI"
                 }
             },
             CancellationToken.None);
@@ -80,9 +83,45 @@ public class ProductElectronicsCategoryRulesTests
     }
 
     [Fact]
+    public async Task CreateProduct_WhenSpecificationValueHasInvalidFormat_ReturnsFailure()
+    {
+        var category = Category.Create("Chargers", "Chargers").Value;
+        var productRepository = new FakeProductRepository();
+        var handler = new CreateProductCommandHandler(
+            productRepository,
+            new FakeCategoryRepository(category),
+            new FakeCatalogUnitOfWork(),
+            new FakeCatalogDomainEventOutbox());
+
+        var result = await handler.Handle(
+            new CreateProductCommand
+            {
+                Sku = "BAS-GAN5-65",
+                ProductName = "Baseus GaN5 Pro",
+                ProductDescription = "USB-C charger",
+                ProductPrice = 3990m,
+                Brand = "Baseus",
+                Model = "GaN5 Pro",
+                WarrantyMonths = 12,
+                CategoryId = category.CategoryId,
+                Specifications = new Dictionary<string, string>
+                {
+                    ["powerWatts"] = "fast",
+                    ["connectorType"] = "USB-C",
+                    ["fastChargingStandard"] = "USB PD"
+                }
+            },
+            CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Contains("powerWatts", result.Error);
+        Assert.Empty(productRepository.Products);
+    }
+
+    [Fact]
     public async Task UpdateProduct_WhenRequiredCategorySpecificationIsMissing_ReturnsFailureWithoutChangingProduct()
     {
-        var category = Category.Create("Smartphones", "Smartphone").Value;
+        var category = Category.Create("Smartphones", "Smartphones").Value;
         var product = Product.Create(
             "APL-IP15-128-BLK",
             "Apple iPhone 15",
@@ -94,9 +133,12 @@ public class ProductElectronicsCategoryRulesTests
             category.CategoryId,
             new Dictionary<string, string>
             {
-                ["memory"] = "128GB",
-                ["display"] = "6.1 inch",
-                ["processor"] = "A16 Bionic"
+                ["deviceModel"] = "iPhone 15",
+                ["storage"] = "128GB",
+                ["screenSize"] = "6.1",
+                ["batteryCapacityMah"] = "3349",
+                ["connectorType"] = "USB-C",
+                ["operatingSystem"] = "iOS"
             }).Value;
         var productRepository = new FakeProductRepository(product);
         var handler = new UpdateProductCommandHandler(
@@ -119,15 +161,18 @@ public class ProductElectronicsCategoryRulesTests
                 CategoryId = category.CategoryId,
                 Specifications = new Dictionary<string, string>
                 {
-                    ["display"] = "6.1 inch",
-                    ["processor"] = "A16 Bionic"
+                    ["deviceModel"] = "iPhone 15",
+                    ["storage"] = "128GB",
+                    ["screenSize"] = "6.1",
+                    ["batteryCapacityMah"] = "3349",
+                    ["operatingSystem"] = "iOS"
                 }
             },
             CancellationToken.None);
 
         Assert.True(result.IsFailure);
-        Assert.Contains("memory", result.Error);
-        Assert.Contains(product.Specifications, s => s.Name == "memory" && s.Value == "128GB");
+        Assert.Contains("connectorType", result.Error);
+        Assert.Contains(product.Specifications, s => s.Name == "connectorType" && s.Value == "USB-C");
     }
 
     private sealed class FakeProductRepository(params Product[] products) : IProductRepository

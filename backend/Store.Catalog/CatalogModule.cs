@@ -6,6 +6,7 @@ using Store.Catalog.Application.CQRS.Command;
 using Store.Catalog.Domain.Interfaces;
 using Store.Catalog.Infrastructure.Repository;
 using Store.Catalog.Application.Interfaces;
+using Store.Catalog.Application.Services;
 using Store.Catalog.Infrastructure.DbContexts;
 using Store.Catalog.Infrastructure.Services;
 
@@ -28,10 +29,15 @@ public static class CatalogModule
             cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
 
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.Configure<ProductImageStorageOptions>(configuration.GetSection("ProductImages"));
+        services.AddScoped<IProductImageRepository, ProductImageRepository>();
+        services.AddScoped<IProductImageStorage, LocalProductImageStorage>();
         services.AddScoped<IProductAvailabilityRepository, ProductAvailabilityRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICatalogUnitOfWork, UnitOfWork>();
         services.AddScoped<ICatalogDomainEventOutbox, CatalogDomainEventOutbox>();
+        services.AddSingleton<ProductExcelExportBuilder>();
+        services.AddSingleton<ProductExcelImportPreviewReader>();
         services.AddHostedService<DomainEventOutboxProcessor<CatalogDbContext>>();
 
         return services;

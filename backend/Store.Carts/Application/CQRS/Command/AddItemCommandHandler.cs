@@ -41,7 +41,13 @@ public class AddItemCommandHandler(
             cart = cartResult.Value;
         }
 
-        var addResult = cart.AddItem(product.ProductId, product.ProductName, product.Price, request.Quantity);
+        var addResult = cart.AddItem(
+            product.ProductId,
+            product.ProductName,
+            product.Price,
+            request.Quantity,
+            product.MainImageUrl,
+            product.MainImageAltText);
         if (addResult.IsFailure)
             return Result.Failure<GetCartDto>(addResult.Error);
 
@@ -56,7 +62,13 @@ public class AddItemCommandHandler(
                 return Result.Failure<GetCartDto>(saveResult.Error);
 
             cart = existingCartResult.Value;
-            addResult = cart.AddItem(product.ProductId, product.ProductName, product.Price, request.Quantity);
+            addResult = cart.AddItem(
+                product.ProductId,
+                product.ProductName,
+                product.Price,
+                request.Quantity,
+                product.MainImageUrl,
+                product.MainImageAltText);
             if (addResult.IsFailure)
                 return Result.Failure<GetCartDto>(addResult.Error);
 

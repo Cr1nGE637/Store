@@ -13,6 +13,8 @@ services:
       - "8080:8080"
     env_file:
       - ./.env
+    volumes:
+      - ./backend/Store.App/wwwroot/uploads/products:/app/wwwroot/uploads/products
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ConnectionStrings__IdentityDbConnectionString=Host=Database;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};SearchPath=identity
@@ -21,6 +23,7 @@ services:
       - ConnectionStrings__OrderingDbConnectionString=Host=Database;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};SearchPath=ordering
       - ConnectionStrings__InventoryDbConnectionString=Host=Database;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};SearchPath=inventory
       - ConnectionStrings__NotificationsDbConnectionString=Host=Database;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};SearchPath=notifications
+      - ConnectionStrings__ConsultingDbConnectionString=Host=Database;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};SearchPath=consulting
       - JwtOptions__SecretKey=${JWT_SECRET_KEY}
       - JwtOptions__Issuer=${JWT_ISSUER}
       - JwtOptions__Audience=${JWT_AUDIENCE}

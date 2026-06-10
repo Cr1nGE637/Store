@@ -21,7 +21,12 @@ public class ProductCacheRepository(CartDbContext context) : IProductCacheReposi
         if (!entity.IsAvailable)
             return Result.Failure<ProductInfo>("Product is not available");
 
-        return Result.Success(new ProductInfo(entity.ProductId, entity.ProductName, entity.Price));
+        return Result.Success(new ProductInfo(
+            entity.ProductId,
+            entity.ProductName,
+            entity.Price,
+            entity.MainImageUrl,
+            entity.MainImageAltText));
     }
 
     public async Task<Result> AddAsync(ProductInfo product)
@@ -34,6 +39,8 @@ public class ProductCacheRepository(CartDbContext context) : IProductCacheReposi
         {
             ProductId = product.ProductId,
             ProductName = product.ProductName,
+            MainImageUrl = product.MainImageUrl,
+            MainImageAltText = product.MainImageAltText,
             Price = product.Price,
             IsAvailable = true
         });
@@ -49,6 +56,19 @@ public class ProductCacheRepository(CartDbContext context) : IProductCacheReposi
             return Result.Failure("Product not found in cache");
 
         entity.Price = newPrice;
+        return Result.Success();
+    }
+
+    public async Task<Result> UpdateMainImageAsync(Guid productId, string imageUrl, string altText)
+    {
+        var entity = await context.ProductCache
+            .FirstOrDefaultAsync(p => p.ProductId == productId);
+
+        if (entity == null)
+            return Result.Failure("Product not found in cache");
+
+        entity.MainImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim();
+        entity.MainImageAltText = string.IsNullOrWhiteSpace(altText) ? null : altText.Trim();
         return Result.Success();
     }
 

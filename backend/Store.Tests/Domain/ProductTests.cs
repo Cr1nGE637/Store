@@ -74,6 +74,95 @@ public class ProductTests
         Assert.Equal(109.9m, domainEvent.NewPrice);
     }
 
+    [Fact]
+    public void Create_WhenSpecificationUsesAlias_StoresCanonicalSpecificationName()
+    {
+        var result = Product.Create(
+            "SSD-001",
+            "NVMe SSD",
+            "Storage",
+            159.9m,
+            "Kingston",
+            "KC3000",
+            60,
+            Guid.NewGuid(),
+            new Dictionary<string, string>
+            {
+                [" form_factor "] = "M.2 2280",
+                ["PowerConsumptionWatts"] = "8"
+            });
+
+        Assert.True(result.IsSuccess);
+        Assert.Contains(result.Value.Specifications, s => s.Name == "formFactor" && s.Value == "M.2 2280");
+        Assert.Contains(result.Value.Specifications, s => s.Name == "powerConsumptionWatts" && s.Value == "8");
+    }
+
+    [Fact]
+    public void Create_WhenNumericSpecificationUsesUnit_StoresValue()
+    {
+        var result = Product.Create(
+            "MON-001",
+            "Gaming Monitor",
+            "Monitor",
+            349.9m,
+            "LG",
+            "27GP850-B",
+            24,
+            Guid.NewGuid(),
+            new Dictionary<string, string>
+            {
+                ["screenSize"] = "27",
+                ["refreshRate"] = "165Hz",
+                ["resolution"] = "2560x1440"
+            });
+
+        Assert.True(result.IsSuccess);
+        Assert.Contains(result.Value.Specifications, s => s.Name == "refreshRate" && s.Value == "165Hz");
+    }
+
+    [Fact]
+    public void Create_WhenNumericSpecificationValueIsInvalid_ReturnsFailure()
+    {
+        var result = Product.Create(
+            "CHG-001",
+            "USB-C Charger",
+            "Charger",
+            49.9m,
+            "Baseus",
+            "GaN5",
+            12,
+            Guid.NewGuid(),
+            new Dictionary<string, string>
+            {
+                ["powerWatts"] = "fast",
+                ["connectorType"] = "USB-C"
+            });
+
+        Assert.True(result.IsFailure);
+        Assert.Contains("powerWatts", result.Error);
+    }
+
+    [Fact]
+    public void Create_WhenResolutionSpecificationValueIsInvalid_ReturnsFailure()
+    {
+        var result = Product.Create(
+            "TV-001",
+            "Smart TV",
+            "TV",
+            799.9m,
+            "Samsung",
+            "Q80D",
+            24,
+            Guid.NewGuid(),
+            new Dictionary<string, string>
+            {
+                ["resolution"] = "very sharp"
+            });
+
+        Assert.True(result.IsFailure);
+        Assert.Contains("resolution", result.Error);
+    }
+
     [Theory]
     [InlineData("", "Keyboard", "Keychron", "K8 Pro", 24, "SKU is required")]
     [InlineData("KB-001", "", "Keychron", "K8 Pro", 24, "Product name is required")]

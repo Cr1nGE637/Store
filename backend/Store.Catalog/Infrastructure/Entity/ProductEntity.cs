@@ -13,4 +13,5 @@ public class ProductEntity
     public Guid CategoryId { get; set; }
     public ProductAvailabilityEntity? Availability { get; set; }
     public List<ProductSpecificationEntity> Specifications { get; set; } = [];
+    public List<ProductImageEntity> Images { get; set; } = [];
 }

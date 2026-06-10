@@ -5,7 +5,7 @@ namespace Store.Catalog.Application;
 
 internal static class CatalogMappings
 {
-    internal static GetProductDto ToGetProductDto(Product p, int availableQuantity = 0) =>
+    internal static GetProductDto ToGetProductDto(Product p, int availableQuantity = 0, ProductImageDto? mainImage = null) =>
         new(
             p.ProductId,
             p.Sku.Value,
@@ -18,7 +18,8 @@ internal static class CatalogMappings
             p.CategoryId,
             p.Specifications.ToDictionary(s => s.Name, s => s.Value),
             availableQuantity,
-            availableQuantity > 0);
+            availableQuantity > 0,
+            mainImage);
 
     internal static CreateProductDto ToCreateProductDto(Product p) =>
         new(

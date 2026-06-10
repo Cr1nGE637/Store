@@ -8,5 +8,6 @@ public interface IProductCacheRepository
     Task<Result<ProductInfo>> GetByIdAsync(Guid productId);
     Task<Result> AddAsync(ProductInfo product);
     Task<Result> UpdatePriceAsync(Guid productId, decimal newPrice);
+    Task<Result> UpdateMainImageAsync(Guid productId, string imageUrl, string altText);
     Task SetUnavailableAsync(Guid productId);
 }

@@ -4,6 +4,7 @@ using Store.Catalog.Application.DTOs;
 using Store.Catalog.Application.Interfaces;
 using Store.Catalog.Domain.Entities;
 using Store.Catalog.Domain.Interfaces;
+using Store.Catalog.Domain.ValueObjects;
 
 namespace Store.Catalog.Application.CQRS.Query;
 
@@ -11,13 +12,16 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<
 {
     private readonly IProductRepository _productRepository;
     private readonly IProductAvailabilityRepository _availabilityRepository;
+    private readonly IProductImageRepository _imageRepository;
 
     public GetProductsQueryHandler(
         IProductRepository productRepository,
-        IProductAvailabilityRepository availabilityRepository)
+        IProductAvailabilityRepository availabilityRepository,
+        IProductImageRepository imageRepository)
     {
         _productRepository = productRepository;
         _availabilityRepository = availabilityRepository;
+        _imageRepository = imageRepository;
     }
 
     public async Task<Result<List<GetProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
@@ -48,11 +52,15 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<
         var availability = await _availabilityRepository.GetAvailableQuantitiesAsync(
             result.Value.Select(product => product.ProductId).ToArray(),
             cancellationToken);
+        var mainImages = await _imageRepository.GetMainImagesAsync(
+            result.Value.Select(product => product.ProductId).ToArray(),
+            cancellationToken);
 
         return Result.Success(result.Value
             .Select(product => CatalogMappings.ToGetProductDto(
                 product,
-                availability.GetValueOrDefault(product.ProductId)))
+                availability.GetValueOrDefault(product.ProductId),
+                mainImages.GetValueOrDefault(product.ProductId)))
             .ToList());
     }
 
@@ -68,7 +76,7 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<
             if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
                 continue;
 
-            normalized[key.Trim()] = value.Trim();
+            normalized[ProductSpecification.NormalizeName(key)] = value.Trim();
         }
 
         return normalized;

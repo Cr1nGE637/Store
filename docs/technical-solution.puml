@@ -1,0 +1,51 @@
+@startuml TechnicalSolution
+title Technical solution
+
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam ArrowColor #4b5563
+skinparam RectangleBorderColor #475569
+skinparam RectangleBackgroundColor #f8fafc
+skinparam NodeBackgroundColor #dbeafe
+skinparam NodeBorderColor #64748b
+skinparam DatabaseBackgroundColor #fdecc8
+skinparam DatabaseBorderColor #b7791f
+
+actor "Пользователь" as User
+
+node "Клиентское устройство" as Client {
+  rectangle "Браузер" as Browser #ffffff
+}
+
+node "Сервер / ВМ" as Server {
+  rectangle "Docker Compose" as Compose #e0f2fe {
+    rectangle "store.frontend\nNginx + React\nпорт 3000" as Frontend #ffffff
+    rectangle "store.app\nASP.NET Core API\nпорт 8080" as Backend #ffffff
+    database "Database\nPostgreSQL\nпорт 5432" as Postgres
+    rectangle "database_volume\nпостоянное хранение данных" as Volume #fff7ed
+    rectangle "store_network\nвнутренняя сеть контейнеров" as Network #f1f5f9
+  }
+}
+
+cloud "SMTP-сервер" as Smtp
+
+User --> Browser
+Browser --> Frontend : HTTP
+Frontend --> Backend : REST API
+Backend --> Postgres : EF Core / SQL
+Postgres --> Volume : данные БД
+Backend --> Smtp : email-уведомления
+
+Frontend .. Network
+Backend .. Network
+Postgres .. Network
+
+note bottom of Compose
+  Компоненты приложения запускаются в отдельных контейнерах,
+  но работают в одной внутренней Docker-сети.
+end note
+
+@enduml

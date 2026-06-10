@@ -2,6 +2,7 @@ import { Filter, Info, Search, ShoppingCart } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { resolveMediaUrl } from "../../api/client";
 import type { Cart, Category, Product, ProductFilters } from "../../api/types";
 import { GhostButton, PrimaryButton } from "../../components/ui/buttons";
 import { CardHeading, EmptyState, FormError, MetaRow, Panel, PanelHeading, SoftBadge } from "../../components/ui/common";
@@ -120,9 +121,13 @@ export function ShopView({ brands, cart, categories, error, filters, isLoading, 
               }}
             >
               <ProductVisual>
-                <DeviceScreen>
-                  <span>{product.brand.slice(0, 2).toUpperCase()}</span>
-                </DeviceScreen>
+                {product.mainImage ? (
+                  <ProductImage src={resolveMediaUrl(product.mainImage.url)} alt={product.mainImage.altText || product.productName} loading="lazy" />
+                ) : (
+                  <DeviceScreen>
+                    <span>{product.brand.slice(0, 2).toUpperCase()}</span>
+                  </DeviceScreen>
+                )}
               </ProductVisual>
               <ProductInfo>
                 <CardHeading>
@@ -310,12 +315,27 @@ const ProductCard = styled.article`
 const ProductVisual = styled.div`
   display: grid;
   place-items: center;
+  min-height: 100%;
+  overflow: hidden;
   background:
     linear-gradient(135deg, rgba(116, 211, 174, 0.24), rgba(226, 104, 81, 0.18)),
     #f5f8f7;
 
   @media (max-width: 760px) {
     min-height: 100%;
+  }
+`;
+
+const ProductImage = styled.img`
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  object-fit: contain;
+  padding: 12px;
+  background: #ffffff;
+
+  @media (max-width: 760px) {
+    min-height: 160px;
   }
 `;
 

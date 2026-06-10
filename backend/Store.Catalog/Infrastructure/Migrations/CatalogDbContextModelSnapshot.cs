@@ -116,6 +116,63 @@ namespace Store.Catalog.Infrastructure.Migrations
                     b.ToTable("Products", "catalog");
                 });
 
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductImageEntity", b =>
+                {
+                    b.Property<Guid>("ProductImageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AltText")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("ProductImageId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId", "IsMain");
+
+                    b.HasIndex("StoragePath")
+                        .IsUnique();
+
+                    b.ToTable("ProductImages", "catalog");
+                });
+
             modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductSpecificationEntity", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -244,9 +301,22 @@ namespace Store.Catalog.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductImageEntity", b =>
+                {
+                    b.HasOne("Store.Catalog.Infrastructure.Entity.ProductEntity", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Store.Catalog.Infrastructure.Entity.ProductEntity", b =>
                 {
                     b.Navigation("Availability");
+
+                    b.Navigation("Images");
 
                     b.Navigation("Specifications");
                 });
